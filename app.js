@@ -692,6 +692,7 @@ function playIndex(i) {
 
 function playNext() { if (currentIndex < currentData.length - 1) playIndex(currentIndex + 1); }
 function playPrev() { if (currentIndex > 0) playIndex(currentIndex - 1); }
+function seekSeconds(s) { if (player && player.getCurrentTime) player.seekTo(player.getCurrentTime() + s, true); }
 
 // ==========================================
 // 7. お絵かき (Telestrator)
@@ -705,16 +706,34 @@ function setDrawTool(tool) {
     document.getElementById('tool-' + tool).classList.add('active'); 
 }
 
-function initTelestrator() { 
-    if(!canvas) return; 
-    resizeCanvas(); 
-    window.addEventListener('resize', resizeCanvas); 
-    canvas.addEventListener('mousedown', startDrawing); 
-    canvas.addEventListener('mousemove', draw); 
-    canvas.addEventListener('mouseup', stopDrawing); 
-    canvas.addEventListener('touchstart', startDrawing, {passive:false}); 
-    canvas.addEventListener('touchmove', draw, {passive:false}); 
-    canvas.addEventListener('touchend', stopDrawing); 
+function initTelestrator() {
+    if(!canvas) return;
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
+    canvas.addEventListener('mousedown', startDrawing);
+    canvas.addEventListener('mousemove', draw);
+    canvas.addEventListener('mouseup', stopDrawing);
+    canvas.addEventListener('touchstart', startDrawing, {passive:false});
+    canvas.addEventListener('touchmove', draw, {passive:false});
+    canvas.addEventListener('touchend', stopDrawing);
+
+    // スワイプで±3秒シーク（描画モード中は無効）
+    let swipeStartX = 0, swipeStartY = 0;
+    const box = document.getElementById('player-box');
+    box.addEventListener('touchstart', e => {
+        if (isDrawingMode) return;
+        swipeStartX = e.touches[0].clientX;
+        swipeStartY = e.touches[0].clientY;
+    }, { passive: true });
+    box.addEventListener('touchend', e => {
+        if (isDrawingMode) return;
+        const dx = e.changedTouches[0].clientX - swipeStartX;
+        const dy = e.changedTouches[0].clientY - swipeStartY;
+        if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.5) {
+            seekSeconds(dx > 0 ? 3 : -3);
+            e.preventDefault();
+        }
+    }, { passive: false });
 }
 
 function resizeCanvas() { 

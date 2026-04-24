@@ -51,6 +51,8 @@
             </div>
             <button class="video-nav-btn nav-prev vid-ui" onclick="event.stopPropagation(); playPrev()">◀</button>
             <button class="video-nav-btn nav-next vid-ui" onclick="event.stopPropagation(); playNext()">▶</button>
+            <button class="seek-btn seek-back vid-ui" onclick="event.stopPropagation(); seekSeconds(-3)">-3s</button>
+            <button class="seek-btn seek-fwd vid-ui" onclick="event.stopPropagation(); seekSeconds(3)">+3s</button>
         </div>
         <canvas id="telestratorCanvas"></canvas>
         <div id="draw-toolbar">

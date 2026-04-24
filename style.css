@@ -79,6 +79,19 @@ body { display: flex; flex-direction: column; background: #eaedf1; }
 .nav-prev { left: 20px; }
 .nav-next { right: 20px; }
 
+.seek-btn {
+    display: none;
+    position: absolute; bottom: 20px;
+    width: 50px; height: 50px;
+    background: rgba(0,0,0,0.5); color: white; border: none;
+    border-radius: 50%; font-size: 0.75rem; font-weight: bold;
+    cursor: pointer; z-index: 20;
+    align-items: center; justify-content: center;
+}
+.seek-back { left: 20px; }
+.seek-fwd  { right: 20px; }
+@media (max-width: 1024px) { .seek-btn { display: flex; } }
+
 #control-side { flex: 1; padding: 15px 20px; overflow-y: auto; background: #fff; border-left: 1px solid #ddd; box-sizing: border-box; display: flex; flex-direction: column; }
 
 .mode-tabs { display: flex; gap: 6px; margin-bottom: 15px; background: var(--bg-light); padding: 4px; border-radius: 8px; }
