@@ -208,13 +208,28 @@ select, .search-input { width: 100%; padding: 10px; border-radius: 8px; border: 
     .tool-btn { font-size: 1rem; padding: 4px 6px; }
     .draw-btn { font-size: 0.75rem; padding: 6px 10px; }
 }
+/* --- Individual タブ フィルターグリッド --- */
+.pf-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+}
+.pf-item { display: flex; flex-direction: column; }
+.pf-item select { margin-bottom: 0; }
+
+/* --- 試合削除ボタン --- */
+.match-select-wrap { display: flex; align-items: center; gap: 6px; }
+.match-select-wrap select { margin-bottom: 0; }
+.delete-match-btn {
+    background: transparent; border: 1px solid #666; color: #aaa;
+    padding: 7px 10px; border-radius: 6px; cursor: pointer; font-size: 0.9rem;
+    transition: 0.2s; flex-shrink: 0;
+}
+.delete-match-btn:hover { background: #d32f2f; border-color: #d32f2f; color: white; }
+
 /* --- スマホ版の調整 --- */
 @media (max-width: 768px) and (orientation: portrait) {
-    /* 個別モードのドロップダウンをスマホでのみ縦積みにする */
-    #player-filters > div {
-        flex-direction: column !important;
-        gap: 10px !important;
-    }
+    .pf-grid { grid-template-columns: 1fr; }
     /* ログアウトボタンを非表示にせず、専用スタイルを適用 */
     .logout-btn {
         display: block !important;

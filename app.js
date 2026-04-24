@@ -257,8 +257,11 @@ async function submitNewMatch() {
     }
 }
 
-function onMatchChange(dvw) { 
-    if (!dvw || !matchMap[dvw]) return; currentMatchDVW = dvw; player.loadVideoById(matchMap[dvw]); 
+function onMatchChange(dvw) {
+    const delBtn = document.getElementById('delete-match-btn');
+    if (!dvw || !matchMap[dvw]) { if(delBtn) delBtn.style.display = 'none'; return; }
+    if(delBtn) delBtn.style.display = 'inline-flex';
+    currentMatchDVW = dvw; player.loadVideoById(matchMap[dvw]);
     document.getElementById('instanceList').innerHTML = '<div class="empty-msg">Analyzing file...</div>';
     fetch(dvw).then(res => res.text()).then(parseDVW).catch(e => {
         document.getElementById('instanceList').innerHTML = '<div class="empty-msg">File load error.</div>';
@@ -917,5 +920,38 @@ function sharePlaylist() {
     const lineUrl = `https://line.me/R/msg/text/?${encodeURIComponent(text + url)}`;
     window.open(lineUrl, '_blank');
 }
+// --- 試合削除 ---
+async function deleteMatch() {
+    if (!currentMatchDVW) return;
+    const sel = document.getElementById('matchSelect');
+    const matchName = sel.options[sel.selectedIndex]?.text || currentMatchDVW;
+
+    const input = prompt(`この試合を完全に削除します。\n\n対象: 「${matchName}」\n\nコメント・いいね・描画データも全て削除されます。\n確認のため「DELETE」と入力してください。`);
+    if (input !== 'DELETE') return;
+
+    const btn = document.getElementById('delete-match-btn');
+    btn.disabled = true; btn.textContent = '…';
+
+    try {
+        const filePath = new URL(currentMatchDVW).pathname.split('/dvw_files/')[1];
+        await Promise.all([
+            supabaseClient.storage.from('dvw_files').remove([filePath]),
+            supabaseClient.from('comments').delete().eq('match_dvw', currentMatchDVW).eq('team_code', MY_TEAM_CODE),
+            supabaseClient.from('likes').delete().eq('match_dvw', currentMatchDVW).eq('team_code', MY_TEAM_CODE),
+            supabaseClient.from('drawings').delete().eq('match_dvw', currentMatchDVW).eq('team_code', MY_TEAM_CODE),
+            supabaseClient.from('matches').delete().eq('dvw_url', currentMatchDVW).eq('team_code', MY_TEAM_CODE)
+        ]);
+        alert('削除しました。');
+        currentMatchDVW = '';
+        btn.style.display = 'none';
+        fetchMatchList();
+    } catch(e) {
+        console.error(e);
+        alert('削除に失敗しました: ' + e.message);
+    } finally {
+        btn.disabled = false; btn.textContent = '🗑️';
+    }
+}
+
 // 起動！
 checkAuth();

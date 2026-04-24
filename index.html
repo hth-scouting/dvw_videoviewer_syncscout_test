@@ -29,10 +29,13 @@
         <div id="catTabs" class="cat-tabs"></div>
         <select id="catSelectMobile" onchange="changeCategoryMobile(this.value)"></select>
         
-        <select id="matchSelect" onchange="onMatchChange(this.value)">
-            <option value="">Select Match...</option>
-        </select>
-        
+        <div class="match-select-wrap">
+            <select id="matchSelect" onchange="onMatchChange(this.value)">
+                <option value="">Select Match...</option>
+            </select>
+            <button id="delete-match-btn" class="delete-match-btn" onclick="deleteMatch()" title="試合を削除" style="display:none;">🗑️</button>
+        </div>
+
         <button class="add-match-btn" onclick="document.getElementById('add-match-modal').style.display='flex'">➕ Add Match</button>
         <button class="logout-btn" style="background: #444; border: 1px solid #666;" onclick="logout()">Logout</button>
     </div>
@@ -77,9 +80,24 @@
         <div class="filter-card" id="filterArea">
             <div id="rally-filters"><span class="filter-label">1. Server Team</span><select id="teamFilterRally" onchange="render()"><option value="">Both Teams</option></select></div>
             <div id="player-filters" style="display:none;">
-                <span class="filter-label">1. Select Team & Player</span>
-                <div style="display:flex; gap:8px;"><select id="teamFilterPlayer" onchange="onTeamChangePlayer()"><option value="">Team</option></select><select id="playerFilter" onchange="render()"><option value="">Player</option></select></div>
-                <div style="display:flex; gap:8px;"><div style="flex:1"><span class="filter-label">2. Skill</span><select id="skillFilter" onchange="render()"><option value="">All</option><option value="S">Serve</option><option value="R">Rec</option><option value="E">Set</option><option value="A">Attack</option><option value="B">Block</option><option value="D">Dig</option></select></div><div style="flex:1"><span class="filter-label">3. Effect</span><select id="effectFilter" onchange="render()"><option value="">All</option><option value="#">Win (#)</option><option value="=">Error (=)</option><option value="+">Pos (+)</option><option value="-">Poor (-)</option><option value="!">Neutral (!)</option></select></div></div>
+                <div class="pf-grid">
+                    <div class="pf-item">
+                        <span class="filter-label">1. Team</span>
+                        <select id="teamFilterPlayer" onchange="onTeamChangePlayer()"><option value="">Select Team</option></select>
+                    </div>
+                    <div class="pf-item">
+                        <span class="filter-label">2. Player</span>
+                        <select id="playerFilter" onchange="render()"><option value="">All Players</option></select>
+                    </div>
+                    <div class="pf-item">
+                        <span class="filter-label">3. Skill</span>
+                        <select id="skillFilter" onchange="render()"><option value="">All</option><option value="S">Serve</option><option value="R">Rec</option><option value="E">Set</option><option value="A">Attack</option><option value="B">Block</option><option value="D">Dig</option></select>
+                    </div>
+                    <div class="pf-item">
+                        <span class="filter-label">4. Effect</span>
+                        <select id="effectFilter" onchange="render()"><option value="">All</option><option value="#">Win (#)</option><option value="=">Error (=)</option><option value="+">Pos (+)</option><option value="-">Poor (-)</option><option value="!">Neutral (!)</option></select>
+                    </div>
+                </div>
             </div>
             <button class="toggle-search-btn" onclick="toggleSearchArea()"><span>🔍 Search Comments / Tags</span><span id="searchArrow">▼</span></button>
             <div class="search-container" id="searchArea">
