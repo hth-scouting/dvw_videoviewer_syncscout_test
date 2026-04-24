@@ -196,6 +196,20 @@ select, .search-input { width: 100%; padding: 10px; border-radius: 8px; border: 
     .brand { font-size: 1rem; }
 }
 
+/* スマホ横向き専用：スコアボードを最小化 */
+@media (max-height: 500px) and (orientation: landscape) {
+    #score-overlay {
+        top: 5px !important; left: 5px !important;
+        width: auto !important; border-radius: 4px !important;
+        transform: none !important;
+    }
+    .score-row { height: 18px !important; }
+    .sticky-bar { width: 3px !important; }
+    .ov-team-box { font-size: 0.5rem !important; padding-left: 3px !important; min-width: 24px !important; }
+    .ov-sets-box { font-size: 0.6rem !important; width: 16px !important; }
+    .ov-points-box { font-size: 0.8rem !important; width: 22px !important; }
+}
+
 @media (max-width: 768px) and (orientation: portrait) {
     body { flex-direction: column; }
     #global-header { flex-direction: column; align-items: stretch; padding: 8px 10px; gap: 8px; }
