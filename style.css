@@ -91,8 +91,9 @@ body { display: flex; flex-direction: column; background: #eaedf1; }
 .seek-back { left: 20px; }
 .seek-fwd  { right: 20px; }
 @media (max-width: 1024px) {
-    .seek-btn { display: flex; width: 37px; height: 37px; font-size: 0.65rem; }
-    .video-nav-btn { width: 44px; height: 44px; font-size: 1.3rem; }
+    .seek-btn { display: flex; width: 35px; height: 35px; font-size: 0.6rem; }
+    .video-nav-btn { width: 35px; height: 35px; font-size: 1.1rem; }
+    #shortcut-btn { display: none !important; }
 }
 
 #control-side { flex: 1; padding: 15px 20px; overflow-y: auto; background: #fff; border-left: 1px solid #ddd; box-sizing: border-box; display: flex; flex-direction: column; }
@@ -187,31 +188,23 @@ select, .search-input { width: 100%; padding: 10px; border-radius: 8px; border: 
 .modal-content kbd { background: #444; padding: 3px 8px; border-radius: 4px; font-family: monospace; font-weight: bold; color: #fff; }
 .close-modal-btn { width: 100%; padding: 10px; background: #444; color: #fff; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; }
 
+@media (orientation: landscape) {
+    #score-overlay { display: none !important; }
+}
+
 @media (max-width: 950px) and (orientation: landscape) {
     #main-workspace { flex-direction: row; }
     #video-side { width: 60%; height: auto; flex: none; }
     #control-side { width: 40%; height: auto; flex: none; padding: 10px; }
-    #score-overlay { transform: scale(0.7); transform-origin: top left; }
-    .video-nav-btn { width: 44px; height: 44px; font-size: 1.3rem; }
+    .video-nav-btn { width: 35px; height: 35px; font-size: 1.1rem; }
     .action-row { flex-wrap: wrap; }
     .comment-input { padding: 6px; font-size: 0.8rem; }
     .header-tools select { width: 180px; font-size: 0.8rem; padding: 6px; }
     .brand { font-size: 1rem; }
+    .card-main { padding-right: 10px; flex-direction: column; align-items: flex-start; }
+    .top-right-actions { position: relative; top: 0; right: 0; margin-top: 8px; width: 100%; justify-content: flex-end; }
 }
 
-/* スマホ横向き専用：スコアボードを最小化 */
-@media (max-height: 500px) and (orientation: landscape) {
-    #score-overlay {
-        top: 5px !important; left: 5px !important;
-        width: auto !important; border-radius: 4px !important;
-        transform: none !important;
-    }
-    .score-row { height: 18px !important; }
-    .sticky-bar { width: 3px !important; }
-    .ov-team-box { font-size: 0.5rem !important; padding-left: 3px !important; min-width: 24px !important; }
-    .ov-sets-box { font-size: 0.6rem !important; width: 16px !important; }
-    .ov-points-box { font-size: 0.8rem !important; width: 22px !important; }
-}
 
 @media (max-width: 768px) and (orientation: portrait) {
     body { flex-direction: column; }
