@@ -90,7 +90,10 @@ body { display: flex; flex-direction: column; background: #eaedf1; }
 }
 .seek-back { left: 20px; }
 .seek-fwd  { right: 20px; }
-@media (max-width: 1024px) { .seek-btn { display: flex; } }
+@media (max-width: 1024px) {
+    .seek-btn { display: flex; width: 37px; height: 37px; font-size: 0.65rem; }
+    .video-nav-btn { width: 44px; height: 44px; font-size: 1.3rem; }
+}
 
 #control-side { flex: 1; padding: 15px 20px; overflow-y: auto; background: #fff; border-left: 1px solid #ddd; box-sizing: border-box; display: flex; flex-direction: column; }
 
@@ -189,7 +192,7 @@ select, .search-input { width: 100%; padding: 10px; border-radius: 8px; border: 
     #video-side { width: 60%; height: auto; flex: none; }
     #control-side { width: 40%; height: auto; flex: none; padding: 10px; }
     #score-overlay { transform: scale(0.7); transform-origin: top left; }
-    .video-nav-btn { width: 40px; height: 40px; font-size: 1rem; }
+    .video-nav-btn { width: 44px; height: 44px; font-size: 1.3rem; }
     .action-row { flex-wrap: wrap; }
     .comment-input { padding: 6px; font-size: 0.8rem; }
     .header-tools select { width: 180px; font-size: 0.8rem; padding: 6px; }
