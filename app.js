@@ -164,7 +164,7 @@ function startTracking() {
     checkInterval = setInterval(() => { 
         if (currentIndex >= 0 && currentData[currentIndex]) { 
             const now = player.getCurrentTime(), d = currentData[currentIndex]; 
-            let limit = (currentMode === 'player') ? d.endTime : (d.rallyEndTime || (d.startTime + 6.0)); 
+            let limit = (currentMode === 'player') ? d.endTime : (d.rallyEndTime || (d.startTime + 7.0)); 
             if (now > limit && currentIndex < currentData.length - 1) playNext(); 
         } 
     }, 500); 
@@ -318,7 +318,7 @@ async function parseDVW(text) {
                     const newH = parseInt(m[1]) || 0, newA = parseInt(m[2]) || 0;
                     runningScore = `${m[1].padStart(2,'0')}-${m[2].padStart(2,'0')}`; 
                     if (tempRally) { 
-                        const t12 = parseFloat(c[12]); tempRally.rallyEndTime = isNaN(t12) ? (tempRally.startTime + 6.0) : t12;
+                        const t12 = parseFloat(c[12]); tempRally.rallyEndTime = isNaN(t12) ? (tempRally.startTime + 7.0) : t12;
                         if (newH > oldH) tempRally.wonBy = '*'; else if (newA > oldA) tempRally.wonBy = 'a'; else tempRally.wonBy = code.toLowerCase().startsWith('*') ? '*' : 'a'; 
                     } pointCodeCount++;
                 } return; 
@@ -328,7 +328,7 @@ async function parseDVW(text) {
                 const side = code.charAt(0), num = parseInt(code.substring(1,3)), time = parseFloat(c[12]), p = playerMaster[`${side}_${num}`] || { name: `Player ${num}`, num };
                 let rH = parseInt(c[9]); if (!isNaN(rH)) currentHomeRot = rH; else rH = currentHomeRot;
                 let rA = parseInt(c[10]); if (!isNaN(rA)) currentAwayRot = rA; else rA = currentAwayRot;
-                const playObj = { id: allPlays.length, time, startTime: time - 2.0, endTime: time + 4.0, score: runningScore, setNum: hSets+aSets+1, hSets, aSets, side, skill: skillChar, effect: code.charAt(5), pName: p.name, pNum: p.num, rot: (side === '*' ? rH : rA) || "?", rallyHomeRot: rH, rallyAwayRot: rA };
+                const playObj = { id: allPlays.length, time, startTime: time - 2.0, endTime: time + 5.0, score: runningScore, setNum: hSets+aSets+1, hSets, aSets, side, skill: skillChar, effect: code.charAt(5), pName: p.name, pNum: p.num, rot: (side === '*' ? rH : rA) || "?", rallyHomeRot: rH, rallyAwayRot: rA };
                 if (skillChar === 'S') { tempRally = playObj; rallies.push(playObj); } else if (tempRally) { playObj.rallyHomeRot = tempRally.rallyHomeRot; playObj.rallyAwayRot = tempRally.rallyAwayRot; }
                 allPlays.push(playObj);
             }
