@@ -10,20 +10,30 @@ let MY_TEAM_CODE = localStorage.getItem('courtend_team_code');
 let MY_TEAM_NAME = localStorage.getItem('courtend_team_name');
 let supabaseClient;
 
+function isLicenceExpired(licenceEndDate) {
+    if (!licenceEndDate) return false;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return today > new Date(licenceEndDate);
+}
+
 async function checkAuth() {
     const urlParams = new URLSearchParams(window.location.search);
     const sharedKey = urlParams.get('key');
-    
+
     const tempClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     if (sharedKey) {
-        const { data, error } = await tempClient.from('teams').select('passcode, team_name').eq('passcode', sharedKey).single();
+        const { data, error } = await tempClient.from('teams').select('passcode, team_name, licence_end_date').eq('passcode', sharedKey).single();
         if (data && !error) {
+            if (isLicenceExpired(data.licence_end_date)) {
+                return authFailed("ライセンスの有効期限が切れています。\n管理者にお問い合わせください。");
+            }
             localStorage.setItem('courtend_team_code', sharedKey);
             localStorage.setItem('courtend_team_name', data.team_name);
             MY_TEAM_CODE = sharedKey;
             MY_TEAM_NAME = data.team_name;
-            
+
             urlParams.delete('key');
             const newUrl = window.location.pathname + (urlParams.toString() ? '?' + urlParams.toString() : '');
             window.history.replaceState({}, '', newUrl);
@@ -36,8 +46,12 @@ async function checkAuth() {
         const input = prompt("チーム専用の合言葉を入力してください");
         if (!input) return authFailed("閲覧には合言葉が必要です。");
 
-        const { data, error } = await tempClient.from('teams').select('passcode, team_name').eq('passcode', input.trim()).single();
+        const { data, error } = await tempClient.from('teams').select('passcode, team_name, licence_end_date').eq('passcode', input.trim()).single();
         if (error || !data) return authFailed("無効な合言葉です。");
+
+        if (isLicenceExpired(data.licence_end_date)) {
+            return authFailed("ライセンスの有効期限が切れています。\n管理者にお問い合わせください。");
+        }
 
         localStorage.setItem('courtend_team_code', input.trim());
         localStorage.setItem('courtend_team_name', data.team_name);
@@ -45,12 +59,20 @@ async function checkAuth() {
         MY_TEAM_NAME = data.team_name;
     }
 
+    // キャッシュログイン時も期限チェック
+    if (MY_TEAM_CODE) {
+        const { data: teamData } = await tempClient.from('teams').select('licence_end_date').eq('passcode', MY_TEAM_CODE).single();
+        if (teamData && isLicenceExpired(teamData.licence_end_date)) {
+            return authFailed("ライセンスの有効期限が切れています。\n管理者にお問い合わせください。");
+        }
+    }
+
     const badge = document.getElementById('team-badge');
     if (badge) {
         badge.innerText = MY_TEAM_NAME;
         badge.style.display = 'inline-flex';
     }
-    
+
     // ★ DBの準備が完全に完了！
     supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
         global: { headers: { 'x-team-code': MY_TEAM_CODE } }
