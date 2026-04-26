@@ -714,6 +714,7 @@ function playIndex(i) {
 function playNext() { if (currentIndex < currentData.length - 1) playIndex(currentIndex + 1); }
 function playPrev() { if (currentIndex > 0) playIndex(currentIndex - 1); }
 function seekSeconds(s) { if (player && player.getCurrentTime) player.seekTo(player.getCurrentTime() + s, true); }
+function replayCurrentPlay() { if (currentIndex >= 0 && currentData[currentIndex]) { player.seekTo(currentData[currentIndex].startTime, true); player.playVideo(); } }
 
 // ==========================================
 // 7. お絵かき (Telestrator)
