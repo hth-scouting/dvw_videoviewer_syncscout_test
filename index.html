@@ -24,11 +24,12 @@
     <div class="brand">
         SyncScout
         <span id="team-badge" class="team-badge"></span>
+        <a href="sync_scout_manual.html" target="_blank" class="manual-btn">❓</a>
     </div>
     <div class="header-tools">
         <div id="catTabs" class="cat-tabs"></div>
         <select id="catSelectMobile" onchange="changeCategoryMobile(this.value)"></select>
-        
+
         <div class="match-select-wrap">
             <select id="matchSelect" onchange="onMatchChange(this.value)">
                 <option value="">Select Match...</option>
@@ -38,7 +39,6 @@
 
         <button class="add-match-btn" onclick="document.getElementById('add-match-modal').style.display='flex'">➕ Add Match</button>
         <div class="header-actions">
-            <a href="sync_scout_manual.html" target="_blank" class="manual-btn">❓</a>
             <button class="logout-btn" onclick="logout()">Logout</button>
         </div>
     </div>

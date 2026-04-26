@@ -31,7 +31,7 @@ body { display: flex; flex-direction: column; background: #eaedf1; }
 .add-match-btn:hover { background: var(--primary-hover); }
 
 .header-actions { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
-.manual-btn { background: transparent; border: 1px solid #666; color: #ccc; padding: 7px 10px; border-radius: 6px; font-size: 0.85rem; cursor: pointer; text-decoration: none; transition: 0.2s; white-space: nowrap; }
+.manual-btn { background: transparent; border: 1px solid #666; color: #ccc; padding: 4px 8px; border-radius: 6px; font-size: 0.8rem; cursor: pointer; text-decoration: none; transition: 0.2s; white-space: nowrap; margin-left: 8px; }
 .manual-btn:hover { background: #555; color: white; }
 .logout-btn { background: #444; border: 1px solid #666; color: white; padding: 8px 12px; border-radius: 6px; font-size: 0.85rem; font-weight: bold; cursor: pointer; white-space: nowrap; }
 
