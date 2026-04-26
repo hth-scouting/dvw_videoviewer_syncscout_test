@@ -90,8 +90,8 @@ body { display: flex; flex-direction: column; background: #eaedf1; }
 }
 .seek-back   { left: 20px; }
 .seek-fwd    { right: 20px; }
-.seek-repeat { left: 50%; transform: translateX(-50%); font-size: 1.1rem; }
-@media (hover: none) { .seek-repeat { font-size: 0.9rem; } }
+.seek-repeat { left: calc(50% - 25px); font-size: 1.1rem; }
+@media (hover: none) { .seek-repeat { left: calc(50% - 17.5px); font-size: 0.9rem; } }
 /* タッチデバイス共通 */
 @media (hover: none) {
     .seek-btn { width: 35px; height: 35px; font-size: 0.6rem; }
