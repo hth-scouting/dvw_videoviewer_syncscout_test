@@ -148,7 +148,7 @@ function jsAttr(val) {
 function onYouTubeIframeAPIReady() { 
     player = new YT.Player('player', { 
         height:'100%', width:'100%', 
-        playerVars:{'playsinline':1,'rel':0,'modestbranding':1}, 
+        playerVars:{'playsinline':1,'rel':0,'modestbranding':1,'controls':0},
         events:{ 'onReady': () => { initTelestrator(); fetchMatchList(); }, 'onStateChange': onPlayerStateChange }
     }); 
 }
