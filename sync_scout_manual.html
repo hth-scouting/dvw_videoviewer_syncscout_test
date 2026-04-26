@@ -748,6 +748,10 @@
   }
 
   /* ── Print ── */
+  /* 画像・figure のレスポンシブ対応 */
+  img { max-width: 100%; height: auto; display: block; }
+  figure { max-width: 100% !important; }
+
   @media print {
     .sidebar { display: none; }
     .mobile-nav-toggle { display: none; }
