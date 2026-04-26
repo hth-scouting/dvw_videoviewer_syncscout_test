@@ -468,8 +468,8 @@ let data = [];
         btn.className = `instance-btn`; 
         btn.id = 'idx-'+i;
         
-        if (d.side === '*') btn.style.borderLeft = '4px solid #1976d2';
-        else if (d.side === 'a') btn.style.borderLeft = '4px solid #d32f2f';
+        if (d.side === '*') btn.style.borderLeft = '4px solid var(--home-accent)';
+        else if (d.side === 'a') btn.style.borderLeft = '4px solid var(--away-accent)';
         
         const cHTML = (matchComments[d.id] || []).map((c, cidx) => `<div class="comment-item"><span>・${escapeHtml(c)}</span><span class="del-comment" onclick="event.stopPropagation(); deleteComment(${d.id}, ${cidx})">✖</span></div>`).join('');
         const hasDraw = (matchDrawings[d.id] && matchDrawings[d.id].length > 0) ? 'style="background:#ffebee; color:#d32f2f; font-weight:bold;"' : '';
