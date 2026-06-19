@@ -999,6 +999,7 @@ function copyPlayLink(index) {
     
     // ★ 追加：URLに合言葉をこっそり含める
     url.searchParams.set('key', MY_TEAM_CODE);
+    url.searchParams.set('team', MY_TEAM_SLUG);
     
     navigator.clipboard.writeText(url.toString()).then(() => {
         alert("🔗 リンクをコピーしました！\n" + url.toString());
@@ -1016,6 +1017,7 @@ function sendLine(index) {
     
     // ★ 追加：URLに合言葉をこっそり含める
     url.searchParams.set('key', MY_TEAM_CODE);
+    url.searchParams.set('team', MY_TEAM_SLUG);
     
     const text = `SyncScout: Set${d.setNum} [${d.score}] #${d.pNum} ${d.pName} のプレー\n`;
     const lineUrl = `https://line.me/R/msg/text/?${encodeURIComponent(text + url.toString())}`;
