@@ -71,44 +71,48 @@ async function requestToken(slug, passcode) {
     }
 }
 
-// ログイン画面を描画し、成功時にトークンで resolve する
+// ログイン画面を「オーバーレイ」として重ねて表示する。
+// 元のページ（document.body）は一切壊さない。
+// 成功したらオーバーレイの要素だけ取り除いて元の画面に戻す。
 function showLogin(prefill) {
     return new Promise((resolve) => {
-        document.body.innerHTML = `
+        const overlay = document.createElement('div');
+        overlay.id = 'login-overlay';
+        overlay.innerHTML = `
         <style>
-          .login-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;
-            background:linear-gradient(135deg,#1a2238,#0f1626);font-family:system-ui,sans-serif;padding:20px;}
-          .login-card{background:#fff;border-radius:16px;padding:32px 28px;width:100%;max-width:360px;
-            box-shadow:0 20px 60px rgba(0,0,0,.35);}
-          .login-card h1{margin:0 0 4px;font-size:1.5rem;color:#1a2238;}
-          .login-sub{margin:0 0 22px;color:#667;font-size:.85rem;}
-          .login-card label{display:block;font-size:.75rem;font-weight:700;color:#445;margin:14px 0 6px;}
-          .login-card input{width:100%;box-sizing:border-box;padding:12px 14px;border:1px solid #cdd3e0;
+          #login-overlay{position:fixed;inset:0;z-index:99999;display:flex;align-items:center;
+            justify-content:center;background:linear-gradient(135deg,#1a2238,#0f1626);
+            font-family:system-ui,sans-serif;padding:20px;}
+          #login-overlay .login-card{background:#fff;border-radius:16px;padding:32px 28px;width:100%;
+            max-width:360px;box-shadow:0 20px 60px rgba(0,0,0,.35);}
+          #login-overlay h1{margin:0 0 4px;font-size:1.5rem;color:#1a2238;}
+          #login-overlay .login-sub{margin:0 0 22px;color:#667;font-size:.85rem;}
+          #login-overlay label{display:block;font-size:.75rem;font-weight:700;color:#445;margin:14px 0 6px;}
+          #login-overlay input{width:100%;box-sizing:border-box;padding:12px 14px;border:1px solid #cdd3e0;
             border-radius:10px;font-size:1rem;outline:none;}
-          .login-card input:focus{border-color:#3a6ff7;}
+          #login-overlay input:focus{border-color:#3a6ff7;}
           #login-btn{width:100%;margin-top:22px;padding:13px;border:0;border-radius:10px;
             background:#3a6ff7;color:#fff;font-size:1rem;font-weight:700;cursor:pointer;}
           #login-btn:disabled{opacity:.6;cursor:default;}
-          .login-err{min-height:1.2em;margin:12px 0 0;color:#d32f2f;font-size:.8rem;text-align:center;}
+          #login-overlay .login-err{min-height:1.2em;margin:12px 0 0;color:#d32f2f;font-size:.8rem;text-align:center;}
         </style>
-        <div class="login-wrap">
-          <div class="login-card">
-            <h1>Sync Scout</h1>
-            <p class="login-sub">チームの合言葉でログイン</p>
-            <label>チームID</label>
-            <input id="login-slug" type="text" autocomplete="off" placeholder="例: blue-tiger" value="${(prefill && prefill.slug) || ''}">
-            <label>合言葉</label>
-            <input id="login-pass" type="password" autocomplete="off" placeholder="チームの合言葉">
-            <button id="login-btn">ログイン</button>
-            <p id="login-err" class="login-err"></p>
-          </div>
+        <div class="login-card">
+          <h1>Sync Scout</h1>
+          <p class="login-sub">チームの合言葉でログイン</p>
+          <label>チームID</label>
+          <input id="login-slug" type="text" autocomplete="off" placeholder="例: blue-tiger" value="${(prefill && prefill.slug) || ''}">
+          <label>合言葉</label>
+          <input id="login-pass" type="password" autocomplete="off" placeholder="チームの合言葉">
+          <button id="login-btn">ログイン</button>
+          <p id="login-err" class="login-err"></p>
         </div>`;
-
-        const slugEl = document.getElementById('login-slug');
-        const passEl = document.getElementById('login-pass');
-        const btn = document.getElementById('login-btn');
-        const err = document.getElementById('login-err');
-
+        document.body.appendChild(overlay);
+ 
+        const slugEl = overlay.querySelector('#login-slug');
+        const passEl = overlay.querySelector('#login-pass');
+        const btn = overlay.querySelector('#login-btn');
+        const err = overlay.querySelector('#login-err');
+ 
         async function submit() {
             const slug = slugEl.value.trim().toLowerCase();
             const passcode = passEl.value.trim();
@@ -117,6 +121,7 @@ function showLogin(prefill) {
             const { ok, status, data } = await requestToken(slug, passcode);
             if (ok && data.token) {
                 saveAuth(data);
+                overlay.remove(); // ★ オーバーレイだけ除去。元のDOMはそのまま生きている
                 resolve(data.token);
                 return;
             }
@@ -125,7 +130,7 @@ function showLogin(prefill) {
                 ? 'ライセンスの有効期限が切れています。管理者にお問い合わせください。'
                 : 'チームIDまたは合言葉が違います。';
         }
-
+ 
         btn.onclick = submit;
         passEl.addEventListener('keydown', (e) => { if (e.key === 'Enter') submit(); });
         ((prefill && prefill.slug) ? passEl : slugEl).focus();
