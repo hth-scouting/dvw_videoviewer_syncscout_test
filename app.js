@@ -1,71 +1,168 @@
-// ==========================================
-// Sync Scout - アプリケーションロジック (前半)
-// ==========================================
+// =====================================================================
+// app.js  認証ブロック差し替え版 (C)
+//
+// ▼ 置き換え範囲：
+//   元 app.js の
+//     「// --- 1. Supabase 設定 & 認証 (チーム隔離) ---」から
+//     「function logout() { ... }」の終わりまで
+//   （次の「// --- 2. グローバル変数 & YouTube 初期化 ---」の直前まで）
+//   を、まるごとこの内容に置き換える。
+//
+// ▼ 変更点：
+//   ・prompt() + teams 直クエリ → slug+合言葉のログイン画面 + team-login 関数呼び出し
+//   ・x-team-code ヘッダー方式を廃止 → 署名付きトークンを Authorization: Bearer で渡す
+//   ・MY_TEAM_CODE / MY_TEAM_NAME は従来通り使えるので、以降のコードは無修正でOK
+//   ・MY_TEAM_SLUG を新設（共有リンクに team=slug を載せるため。後述の共有関数で使用）
+// =====================================================================
 
-// --- 1. Supabase 設定 & 認証 (チーム隔離) ---
+// --- 1. Supabase 設定 & 認証 (slug + 合言葉 / トークン方式) ---
 const SUPABASE_URL = 'https://ciokifeakrkigonhwbyf.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNpb2tpZmVha3JraWdvbmh3YnlmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ5ODQxNjgsImV4cCI6MjA5MDU2MDE2OH0.NYqH52Rl7Gn9SKeF3mnDioEphpoKpCDrxv6NifU69Po';
+const LOGIN_FN_URL = `${SUPABASE_URL}/functions/v1/team-login`;
 
-let MY_TEAM_CODE = localStorage.getItem('courtend_team_code');
-let MY_TEAM_NAME = localStorage.getItem('courtend_team_name');
+let MY_TEAM_CODE = null;   // = team の passcode（既存コードの insert/filter/共有リンクで使用）
+let MY_TEAM_SLUG = null;   // = team の slug（共有リンク用）
+let MY_TEAM_NAME = null;
 let supabaseClient;
 
-function isLicenceExpired(licenceEndDate) {
-    if (!licenceEndDate) return false;
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    return today > new Date(licenceEndDate);
+function getStoredAuth() {
+    try {
+        const raw = localStorage.getItem('courtend_auth');
+        if (!raw) return null;
+        const a = JSON.parse(raw);
+        if (!a.token || !a.expires_at || Date.now() > a.expires_at) return null;
+        return a;
+    } catch { return null; }
+}
+
+function saveAuth(d) {
+    localStorage.setItem('courtend_auth', JSON.stringify({
+        token: d.token,
+        team_name: d.team_name,
+        team_code: d.team_code,
+        slug: d.slug,
+        expires_at: Date.now() + ((d.expires_in || 3600) - 60) * 1000, // 60秒マージン
+    }));
+}
+
+function clearAuth() {
+    localStorage.removeItem('courtend_auth');
+    // 旧方式の残骸も掃除
+    localStorage.removeItem('courtend_team_code');
+    localStorage.removeItem('courtend_team_name');
+}
+
+// team-login を叩いてトークンを得る
+async function requestToken(slug, passcode) {
+    try {
+        const res = await fetch(LOGIN_FN_URL, {
+            method: 'POST',
+            headers: {
+                'content-type': 'application/json',
+                'apikey': SUPABASE_ANON_KEY,
+                'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+            },
+            body: JSON.stringify({ slug, passcode }),
+        });
+        const data = await res.json().catch(() => ({}));
+        return { ok: res.ok, status: res.status, data };
+    } catch {
+        return { ok: false, status: 0, data: {} };
+    }
+}
+
+// ログイン画面を描画し、成功時にトークンで resolve する
+function showLogin(prefill) {
+    return new Promise((resolve) => {
+        document.body.innerHTML = `
+        <style>
+          .login-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;
+            background:linear-gradient(135deg,#1a2238,#0f1626);font-family:system-ui,sans-serif;padding:20px;}
+          .login-card{background:#fff;border-radius:16px;padding:32px 28px;width:100%;max-width:360px;
+            box-shadow:0 20px 60px rgba(0,0,0,.35);}
+          .login-card h1{margin:0 0 4px;font-size:1.5rem;color:#1a2238;}
+          .login-sub{margin:0 0 22px;color:#667;font-size:.85rem;}
+          .login-card label{display:block;font-size:.75rem;font-weight:700;color:#445;margin:14px 0 6px;}
+          .login-card input{width:100%;box-sizing:border-box;padding:12px 14px;border:1px solid #cdd3e0;
+            border-radius:10px;font-size:1rem;outline:none;}
+          .login-card input:focus{border-color:#3a6ff7;}
+          #login-btn{width:100%;margin-top:22px;padding:13px;border:0;border-radius:10px;
+            background:#3a6ff7;color:#fff;font-size:1rem;font-weight:700;cursor:pointer;}
+          #login-btn:disabled{opacity:.6;cursor:default;}
+          .login-err{min-height:1.2em;margin:12px 0 0;color:#d32f2f;font-size:.8rem;text-align:center;}
+        </style>
+        <div class="login-wrap">
+          <div class="login-card">
+            <h1>Sync Scout</h1>
+            <p class="login-sub">チームの合言葉でログイン</p>
+            <label>チームID</label>
+            <input id="login-slug" type="text" autocomplete="off" placeholder="例: blue-tiger" value="${(prefill && prefill.slug) || ''}">
+            <label>合言葉</label>
+            <input id="login-pass" type="password" autocomplete="off" placeholder="チームの合言葉">
+            <button id="login-btn">ログイン</button>
+            <p id="login-err" class="login-err"></p>
+          </div>
+        </div>`;
+
+        const slugEl = document.getElementById('login-slug');
+        const passEl = document.getElementById('login-pass');
+        const btn = document.getElementById('login-btn');
+        const err = document.getElementById('login-err');
+
+        async function submit() {
+            const slug = slugEl.value.trim().toLowerCase();
+            const passcode = passEl.value.trim();
+            if (!slug || !passcode) { err.innerText = 'チームIDと合言葉を入力してください'; return; }
+            btn.disabled = true; err.innerText = '確認中…';
+            const { ok, status, data } = await requestToken(slug, passcode);
+            if (ok && data.token) {
+                saveAuth(data);
+                resolve(data.token);
+                return;
+            }
+            btn.disabled = false;
+            err.innerText = status === 403
+                ? 'ライセンスの有効期限が切れています。管理者にお問い合わせください。'
+                : 'チームIDまたは合言葉が違います。';
+        }
+
+        btn.onclick = submit;
+        passEl.addEventListener('keydown', (e) => { if (e.key === 'Enter') submit(); });
+        ((prefill && prefill.slug) ? passEl : slugEl).focus();
+    });
 }
 
 async function checkAuth() {
-    const urlParams = new URLSearchParams(window.location.search);
-    const sharedKey = urlParams.get('key');
+    const params = new URLSearchParams(window.location.search);
+    const linkSlug = params.get('team');
+    const linkPass = params.get('key');
 
-    const tempClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    let auth = getStoredAuth();
 
-    if (sharedKey) {
-        const { data, error } = await tempClient.from('teams').select('passcode, team_name, licence_end_date').eq('passcode', sharedKey).single();
-        if (data && !error) {
-            if (isLicenceExpired(data.licence_end_date)) {
-                return authFailed("ライセンスの有効期限が切れています。\n管理者にお問い合わせください。");
-            }
-            localStorage.setItem('courtend_team_code', sharedKey);
-            localStorage.setItem('courtend_team_name', data.team_name);
-            MY_TEAM_CODE = sharedKey;
-            MY_TEAM_NAME = data.team_name;
-
-            urlParams.delete('key');
-            const newUrl = window.location.pathname + (urlParams.toString() ? '?' + urlParams.toString() : '');
-            window.history.replaceState({}, '', newUrl);
-        } else {
-            alert("リンクの合言葉が無効です。手動でログインしてください。");
+    // 共有リンク（?team=slug&key=合言葉）からの自動ログイン
+    if (!auth && linkSlug && linkPass) {
+        const { ok, data } = await requestToken(linkSlug.trim().toLowerCase(), linkPass.trim());
+        if (ok && data.token) {
+            saveAuth(data);
+            auth = getStoredAuth();
         }
+        // URLから合言葉を除去
+        params.delete('team'); params.delete('key');
+        const newUrl = window.location.pathname + (params.toString() ? '?' + params.toString() : '');
+        window.history.replaceState({}, '', newUrl);
     }
 
-    if (!MY_TEAM_CODE || !MY_TEAM_NAME) {
-        const input = prompt("チーム専用の合言葉を入力してください");
-        if (!input) return authFailed("閲覧には合言葉が必要です。");
-
-        const { data, error } = await tempClient.from('teams').select('passcode, team_name, licence_end_date').eq('passcode', input.trim()).single();
-        if (error || !data) return authFailed("無効な合言葉です。");
-
-        if (isLicenceExpired(data.licence_end_date)) {
-            return authFailed("ライセンスの有効期限が切れています。\n管理者にお問い合わせください。");
-        }
-
-        localStorage.setItem('courtend_team_code', input.trim());
-        localStorage.setItem('courtend_team_name', data.team_name);
-        MY_TEAM_CODE = input.trim();
-        MY_TEAM_NAME = data.team_name;
+    // 未ログインならログイン画面（成功するまで待つ）
+    if (!auth) {
+        await showLogin({ slug: linkSlug });
+        auth = getStoredAuth();
+        if (!auth) return;
     }
 
-    // キャッシュログイン時も期限チェック
-    if (MY_TEAM_CODE) {
-        const { data: teamData } = await tempClient.from('teams').select('licence_end_date').eq('passcode', MY_TEAM_CODE).single();
-        if (teamData && isLicenceExpired(teamData.licence_end_date)) {
-            return authFailed("ライセンスの有効期限が切れています。\n管理者にお問い合わせください。");
-        }
-    }
+    // 既存コードが使うグローバルを復元
+    MY_TEAM_CODE = auth.team_code;
+    MY_TEAM_SLUG = auth.slug;
+    MY_TEAM_NAME = auth.team_name;
 
     const badge = document.getElementById('team-badge');
     if (badge) {
@@ -73,33 +170,26 @@ async function checkAuth() {
         badge.style.display = 'inline-flex';
     }
 
-    // ★ DBの準備が完全に完了！
+    // ★ トークン方式でクライアント生成（x-team-code ヘッダーは廃止）
     supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-        global: { headers: { 'x-team-code': MY_TEAM_CODE } }
+        global: { headers: { Authorization: `Bearer ${auth.token}` } },
+        auth: { persistSession: false },
     });
-    
-    // ★ ここで初めてYouTubeを読み込む（フライングエラー回避！）
+
+    // YouTube 初期化（従来通り）
     if (window.YT && window.YT.Player) {
         onYouTubeIframeAPIReady();
     } else {
-        const tag = document.createElement('script'); 
-        tag.src = "https://www.youtube.com/iframe_api"; 
+        const tag = document.createElement('script');
+        tag.src = "https://www.youtube.com/iframe_api";
         document.head.appendChild(tag);
     }
 }
 
-function authFailed(msg) {
-    alert(msg); 
-    localStorage.removeItem('courtend_team_code'); 
-    localStorage.removeItem('courtend_team_name');
-    document.body.innerHTML = `<div style="padding:20px; text-align:center;"><h2>Access Denied</h2><p>${msg}</p><button class="action-btn" onclick="location.reload()">再入力</button></div>`;
-}
-
 function logout() {
-    if(confirm("ログアウトしますか？")) { 
-        localStorage.removeItem('courtend_team_code'); 
-        localStorage.removeItem('courtend_team_name');
-        location.reload(); 
+    if (confirm("ログアウトしますか？")) {
+        clearAuth();
+        location.reload();
     }
 }
 
