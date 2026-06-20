@@ -459,7 +459,7 @@ function startTracking() {
     checkInterval = setInterval(() => {
         if (currentIndex >= 0 && currentData[currentIndex]) {
             const now = player.getCurrentTime(), d = currentData[currentIndex];
-            let limit = (currentMode === 'player') ? d.endTime : (d.rallyEndTime || (d.startTime + 7.0));
+            let limit = (currentMode === 'player') ? d.endTime : (d.rallyEndTime || (d.startTime + 7.0)) + 2.0;
             if (now > limit && currentIndex < currentData.length - 1) playNext();
         }
     }, 500);
