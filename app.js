@@ -796,11 +796,13 @@ function render() {
                 </div>
             </div>
             <div class="top-right-actions">
-                <button class="action-sm-btn" ${hasDraw} onclick="event.stopPropagation(); enterDrawMode(${d.id})">&#x270F;&#xFE0F; ${t('draw_label')}</button>
                 <button class="action-sm-btn" ${noteBtnStyle} onclick="toggleActions(event, ${i})">&#x1F4AC; ${t('note_label')} ${cCount ? `(${cCount})` : ''}</button>
             </div>
             <div class="card-actions" id="actions-${i}">
                 <div id="c-disp-${d.id}">${cHTML}</div>
+                <div class="action-row" style="margin-bottom:5px;">
+                    <button class="action-btn" ${hasDraw} style="background:var(--text-secondary); color:#fff; flex:1; display:flex; align-items:center; justify-content:center; gap:4px;" onclick="event.stopPropagation(); enterDrawMode(${d.id})">&#x270F;&#xFE0F; ${t('draw_label')}</button>
+                </div>
                 <div class="action-row">
                     <div class="tag-popup" id="tags-${d.id}">${starterTags.map(tg => `<div class="tag-chip" onclick="applyTag(${d.id}, '${tg}')">${tg}</div>`).join('')}</div>
                     <button class="tag-trigger" onclick="event.stopPropagation(); toggleTagPopup(${d.id})">#</button>
