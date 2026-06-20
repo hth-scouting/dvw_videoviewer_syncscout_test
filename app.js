@@ -379,7 +379,16 @@ async function checkAuth() {
     }
 
     supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-        global: { headers: { Authorization: `Bearer ${auth.token}` } },
+        global: {
+            headers: { Authorization: `Bearer ${auth.token}` },
+            fetch: (...args) => fetch(...args).then(res => {
+                if (res.status === 401 || res.status === 403) {
+                    clearAuth();
+                    location.reload();
+                }
+                return res;
+            }),
+        },
         auth: { persistSession: false },
     });
 
@@ -473,7 +482,7 @@ function fetchMatchList() {
         allMatchData = []; let cats = new Set(["All"]);
         if(dbRes.error) {
             console.error("Match fetch error:", dbRes.error);
-            document.getElementById('instanceList').innerHTML = `<div class="empty-msg">Error: ${dbRes.error.message}</div>`;
+            document.getElementById('instanceList').innerHTML = `<div class="empty-msg">Error: ${escapeHtml(dbRes.error.message)}</div>`;
             return;
         }
         if(dbRes.data && dbRes.data.length > 0) {
@@ -688,7 +697,7 @@ async function loadCloudData() {
 }
 
 function updateFilters() {
-    const h = document.getElementById('ov-h-code').innerText, a = document.getElementById('ov-a-code').innerText;
+    const h = escapeHtml(document.getElementById('ov-h-code').innerText), a = escapeHtml(document.getElementById('ov-a-code').innerText);
     document.getElementById('teamFilterRally').innerHTML = `<option value="">${t('both_teams')}</option><option value="*">${h}${t('serves')}</option><option value="a">${a}${t('serves')}</option>`;
     document.getElementById('teamFilterPlayer').innerHTML = `<option value="">${t('select_team')}</option><option value="*">${h}</option><option value="a">${a}</option>`;
     document.getElementById('score-overlay').style.display = 'flex';
@@ -835,7 +844,7 @@ function render() {
 function renderDualTables() {
     const list = document.getElementById('instanceList'); list.innerHTML = '';
     ["*", "a"].forEach(side => {
-        const team = side === "*" ? document.getElementById('ov-h-code').innerText : document.getElementById('ov-a-code').innerText;
+        const team = escapeHtml(side === "*" ? document.getElementById('ov-h-code').innerText : document.getElementById('ov-a-code').innerText);
         list.innerHTML += `<div class="stats-section-title">${team}${t('stats_label')}</div><div class="stats-container"><table class="stats-table" id="t-${side}"></table></div>`;
         buildTable(side, `t-${side}`);
     });
@@ -876,7 +885,7 @@ function buildTable(side, targetId) {
 function renderRotationTables() {
     const list = document.getElementById('instanceList'); list.innerHTML = '';
     ["*", "a"].forEach(side => {
-        const team = side === "*" ? document.getElementById('ov-h-code').innerText : document.getElementById('ov-a-code').innerText;
+        const team = escapeHtml(side === "*" ? document.getElementById('ov-h-code').innerText : document.getElementById('ov-a-code').innerText);
         list.innerHTML += `<div class="stats-section-title">${team}${t('rotation_label')}</div><div class="stats-container"><table class="stats-table" id="t-rot-${side}"></table></div>`;
         buildRotationTable(side, `t-rot-${side}`);
     });
