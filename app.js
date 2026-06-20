@@ -619,7 +619,9 @@ async function parseDVW(text) {
             }
             const skillChar = code.charAt(3);
             if ("SRABDE".includes(skillChar)) {
-                const side = code.charAt(0), num = parseInt(code.substring(1,3)), time = parseFloat(c[12]), p = playerMaster[`${side}_${num}`] || { name: `Player ${num}`, num };
+                const side = code.charAt(0), num = parseInt(code.substring(1,3)), time = parseFloat(c[12]);
+                if (isNaN(num) || isNaN(time)) return;
+                const p = playerMaster[`${side}_${num}`] || { name: `Player ${num}`, num };
                 let rH = parseInt(c[9]); if (!isNaN(rH)) currentHomeRot = rH; else rH = currentHomeRot;
                 let rA = parseInt(c[10]); if (!isNaN(rA)) currentAwayRot = rA; else rA = currentAwayRot;
                 const playObj = { id: allPlays.length, time, startTime: time - 2.0, endTime: time + 5.0, score: runningScore, setNum: hSets+aSets+1, hSets, aSets, side, skill: skillChar, effect: code.charAt(5), pName: p.name, pNum: p.num, rot: (side === '*' ? rH : rA) || "?", rallyHomeRot: rH, rallyAwayRot: rA };
