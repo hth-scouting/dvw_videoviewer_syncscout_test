@@ -29,11 +29,14 @@
         <span id="team-badge" class="team-badge"></span>
     </div>
 
-    <!-- PC: category tabs -->
-    <div id="catTabs" class="cat-tabs pc-only"></div>
-
-    <!-- Mobile: category select -->
-    <select id="catSelectMobile" class="mobile-only" onchange="changeCategoryMobile(this.value)"></select>
+    <!-- Category dropdown -->
+    <div class="cat-dropdown-wrap" id="catDropdownWrap">
+        <button class="cat-dropdown-btn" onclick="toggleCatDropdown()">
+            <span id="catCurrentLabel">All</span>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <div class="cat-dropdown-list" id="catDropdownList"></div>
+    </div>
 
     <!-- Shared: match select -->
     <select id="matchSelect" class="header-match-select" onchange="onMatchChange(this.value)">

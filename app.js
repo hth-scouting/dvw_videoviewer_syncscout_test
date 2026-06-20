@@ -488,29 +488,37 @@ function fetchMatchList() {
     });
 }
 
+let catList = [];
+
 function renderCategoryTabs(cats) {
-    const div = document.getElementById('catTabs'); if(!div) return; div.innerHTML = '';
-    if (cats.length <= 1) div.innerHTML = `<span class="empty-msg" style="padding:4px 8px;font-size:0.75rem;">${t('no_categories')}</span>`;
-    cats.forEach(c => {
-        const btn = document.createElement('div'); btn.className = `cat-tab ${c === currentCategory ? 'active' : ''}`;
-        btn.innerText = c; btn.onclick = () => { currentCategory = c; renderCategoryTabs(cats); updateMatchDropdown(); };
-        div.appendChild(btn);
-    });
+    catList = cats;
+    const label = document.getElementById('catCurrentLabel');
+    if (label) label.textContent = currentCategory;
 
-    const mob = document.getElementById('catSelectMobile'); if(!mob) return;
-    mob.innerHTML = '';
+    const list = document.getElementById('catDropdownList');
+    if (!list) return;
+    list.innerHTML = '';
     cats.forEach(c => {
-        const opt = new Option(c, c); if(c === currentCategory) opt.selected = true;
-        mob.appendChild(opt);
+        const btn = document.createElement('button');
+        btn.className = `cat-dropdown-item${c === currentCategory ? ' active' : ''}`;
+        btn.textContent = c;
+        btn.onclick = (e) => { e.stopPropagation(); currentCategory = c; renderCategoryTabs(cats); updateMatchDropdown(); closeCatDropdown(); };
+        list.appendChild(btn);
     });
 }
 
-function changeCategoryMobile(val) {
-    currentCategory = val;
-    const cats = Array.from(document.querySelectorAll('#catTabs .cat-tab')).map(b => b.innerText);
-    renderCategoryTabs(cats.length ? cats : [val]);
-    updateMatchDropdown();
+function toggleCatDropdown() {
+    const list = document.getElementById('catDropdownList');
+    if (list) list.classList.toggle('show');
 }
+function closeCatDropdown() {
+    const list = document.getElementById('catDropdownList');
+    if (list) list.classList.remove('show');
+}
+document.addEventListener('click', (e) => {
+    const wrap = document.getElementById('catDropdownWrap');
+    if (wrap && !wrap.contains(e.target)) closeCatDropdown();
+});
 
 function updateMatchDropdown() {
     const select = document.getElementById('matchSelect'); if(!select) return;
