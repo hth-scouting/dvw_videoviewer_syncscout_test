@@ -72,7 +72,7 @@ body {
 }
 
 /* Category tabs (PC) */
-.cat-tabs { display: flex; gap: 4px; flex-shrink: 0; }
+.cat-tabs { display: flex; gap: 4px; flex-shrink: 0; margin-left: auto; }
 .cat-tab {
     background: transparent; border: 1px solid rgba(255,255,255,0.12); color: rgba(255,255,255,0.5);
     padding: 5px 12px; border-radius: var(--radius-pill); font-size: 0.7rem;
@@ -606,7 +606,7 @@ select:focus, .search-input:focus { border-color: var(--primary); box-shadow: 0 
     .pc-only { display: none !important; }
     .mobile-only {
         display: block; flex: 1; min-width: 0;
-        padding: 6px 8px; margin: 0;
+        padding: 6px 8px; margin: 0; margin-left: auto;
         border: 1px solid rgba(255,255,255,0.12);
         background: rgba(255,255,255,0.06); color: #fff;
         border-radius: 6px; font-size: 0.78rem; font-weight: 600;
