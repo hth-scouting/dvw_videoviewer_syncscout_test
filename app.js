@@ -777,6 +777,8 @@ function render() {
         else if (d.side === 'a') btn.style.borderLeftColor = 'var(--away-accent)';
 
         const skillBadge = getSkillBadge(d.skill, d.effect);
+        const skillClassMap = { A:'card-atk', S:'card-srv', R:'card-rcv', B:'card-blk', D:'card-dig', E:'card-set' };
+        if (skillClassMap[d.skill]) btn.classList.add(skillClassMap[d.skill]);
         if (d.effect === '#') btn.classList.add('card-kill');
         else if (d.effect === '=') btn.classList.add('card-error');
 
