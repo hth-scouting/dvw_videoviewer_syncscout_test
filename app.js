@@ -207,6 +207,38 @@ function toggleLang() {
 
 function hideAllTagPopups() { document.querySelectorAll('.tag-popup').forEach(p => p.classList.remove('show')); }
 
+// --- Mobile menu ---
+function toggleMobileMenu() {
+    const menu = document.getElementById('mobile-menu');
+    if (menu) {
+        menu.classList.toggle('show');
+        if (menu.classList.contains('show')) syncMobileMenuSelects();
+    }
+}
+document.addEventListener('click', (e) => {
+    const menu = document.getElementById('mobile-menu');
+    const btn = document.getElementById('mobile-menu-toggle');
+    if (menu && menu.classList.contains('show') && !menu.contains(e.target) && !btn.contains(e.target)) {
+        menu.classList.remove('show');
+    }
+});
+
+function syncMobileMenuSelects() {
+    const catMenu = document.getElementById('catSelectMobileMenu');
+    const catDesktop = document.getElementById('catSelectMobile');
+    if (catMenu && catDesktop) {
+        catMenu.innerHTML = catDesktop.innerHTML;
+        catMenu.value = catDesktop.value;
+    }
+    const matchMenu = document.getElementById('matchSelectMobile');
+    const matchDesktop = document.getElementById('matchSelect');
+    if (matchMenu && matchDesktop) {
+        matchMenu.innerHTML = matchDesktop.innerHTML;
+        matchMenu.value = matchDesktop.value;
+        matchMenu.disabled = matchDesktop.disabled;
+    }
+}
+
 // --- 1. Supabase 設定 & 認証 (slug + 合言葉 / トークン方式) ---
 const SUPABASE_URL = 'https://ciokifeakrkigonhwbyf.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNpb2tpZmVha3JraWdvbmh3YnlmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ5ODQxNjgsImV4cCI6MjA5MDU2MDE2OH0.NYqH52Rl7Gn9SKeF3mnDioEphpoKpCDrxv6NifU69Po';
@@ -503,6 +535,7 @@ function updateMatchDropdown() {
     const filtered = allMatchData.filter(m => currentCategory === "All" || m.cat === currentCategory);
     if(filtered.length === 0) { select.innerHTML = `<option value="">${t('no_matches')}</option>`; select.disabled = true; }
     else { select.disabled = false; filtered.forEach(m => { matchMap[m.dvw] = m.vid; let name = m.display_name ? m.display_name : m.dvw.split('/').pop().replace('.dvw',''); select.add(new Option(name, m.dvw)); }); }
+    syncMobileMenuSelects();
 }
 
 function toggleShortcuts() {
