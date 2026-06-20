@@ -332,6 +332,37 @@ select:focus, .search-input:focus { border-color: var(--primary); box-shadow: 0 
 .win-home { border-left-color: var(--home-accent) !important; }
 .win-away { border-left-color: var(--away-accent) !important; }
 
+/* Card accent: kill (#) */
+.instance-btn.card-kill {
+    background: linear-gradient(135deg, rgba(255,215,0,0.06) 0%, var(--surface) 60%);
+    border-left-width: 5px;
+    box-shadow: inset 0 -2px 0 0 #d4a017;
+}
+/* Card accent: error (=) */
+.instance-btn.card-error {
+    background: linear-gradient(135deg, rgba(229,57,53,0.04) 0%, var(--surface) 60%);
+    box-shadow: inset 0 -2px 0 0 var(--danger);
+}
+
+/* Skill badge (inline) */
+.skill-badge {
+    display: inline-block; font-size: 0.58rem; font-weight: 800;
+    padding: 1px 6px; border-radius: var(--radius-pill);
+    vertical-align: middle; margin-left: 4px; letter-spacing: 0.5px;
+    line-height: 1.5;
+}
+.badge-atk { background: rgba(156,39,176,0.1);  color: #9c27b0; border: 1px solid rgba(156,39,176,0.2); }
+.badge-srv { background: rgba(33,150,243,0.1);   color: #1e88e5; border: 1px solid rgba(33,150,243,0.2); }
+.badge-rcv { background: rgba(0,150,136,0.1);    color: #00897b; border: 1px solid rgba(0,150,136,0.2); }
+.badge-blk { background: rgba(255,152,0,0.1);    color: #ef6c00; border: 1px solid rgba(255,152,0,0.2); }
+.badge-dig { background: rgba(121,85,72,0.1);    color: #6d4c41; border: 1px solid rgba(121,85,72,0.2); }
+.badge-set { background: rgba(96,125,139,0.1);   color: #546e7a; border: 1px solid rgba(96,125,139,0.2); }
+
+/* Effect modifiers on badge */
+.badge-kill { background: rgba(212,160,23,0.15) !important; color: #b8860b !important; border-color: rgba(212,160,23,0.3) !important; font-weight: 900; }
+.badge-err  { background: var(--danger-subtle) !important;  color: var(--danger) !important; border-color: rgba(229,57,53,0.25) !important; }
+.badge-pos  { background: rgba(46,125,50,0.1) !important;  color: var(--success) !important; border-color: rgba(46,125,50,0.2) !important; }
+
 .card-main { display: flex; align-items: center; cursor: pointer; padding-right: 140px; min-height: 40px; }
 .score-box {
     font-family: 'Inter', monospace; font-size: 0.95rem; font-weight: 700;

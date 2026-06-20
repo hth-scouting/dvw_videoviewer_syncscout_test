@@ -59,7 +59,7 @@ const i18n = {
         upload_success: "Match added successfully!",
         upload_fail: "Failed to add match.",
         uploading: "Uploading...",
-        delete_confirm_prompt: "This will permanently delete this match.\n\nTarget: \"{name}\"\n\nAll comments, likes, and drawings will also be deleted.\nType \"DELETE\" to confirm.",
+        delete_confirm_prompt: "This will permanently delete this match.\n\nTarget: \"{name}\"\n\nAll comments and drawings will also be deleted.\nType \"DELETE\" to confirm.",
         deleted: "Deleted.",
         delete_fail: "Failed to delete: ",
         link_copied: "Link copied!",
@@ -143,7 +143,7 @@ const i18n = {
         upload_success: "追加しました！",
         upload_fail: "追加に失敗しました。",
         uploading: "アップロード中...",
-        delete_confirm_prompt: "この試合を完全に削除します。\n\n対象: 「{name}」\n\nコメント・いいね・描画データも全て削除されます。\n確認のため「DELETE」と入力してください。",
+        delete_confirm_prompt: "この試合を完全に削除します。\n\n対象: 「{name}」\n\nコメント・描画データも全て削除されます。\n確認のため「DELETE」と入力してください。",
         deleted: "削除しました。",
         delete_fail: "削除に失敗しました: ",
         link_copied: "リンクをコピーしました！",
@@ -430,7 +430,7 @@ window.initLinkData = { t: urlParams.t, q: urlParams.q, match: urlParams.match, 
 
 let player, allPlays = [], rallies = [], matchMap = {}, playerMaster = {}, allMatchData = [], currentData = [];
 let currentMode = 'rally', currentIndex = -1, checkInterval;
-let currentMatchDVW = "", currentCategory = "All", matchComments = {}, matchLikes = {}, matchDrawings = {}, likedPlaysSession = new Set();
+let currentMatchDVW = "", currentCategory = "All", matchComments = {}, matchDrawings = {};
 const starterTags = ["#MB","#OH","#OP","#S","#L","#Good","#Bad","#System","#Transition","#BlockDefense","#Check"];
 
 function escapeHtml(str) {
@@ -669,13 +669,11 @@ async function parseDVW(text) {
 }
 
 async function loadCloudData() {
-    const [cRes, lRes, dRes] = await Promise.all([
+    const [cRes, dRes] = await Promise.all([
         supabaseClient.from('comments').select('*').eq('match_dvw', currentMatchDVW).eq('team_code', MY_TEAM_CODE),
-        supabaseClient.from('likes').select('play_id').eq('match_dvw', currentMatchDVW).eq('team_code', MY_TEAM_CODE),
         supabaseClient.from('drawings').select('*').eq('match_dvw', currentMatchDVW).eq('team_code', MY_TEAM_CODE).order('created_at', { ascending: false })
     ]);
     matchComments = {}; (cRes.data || []).forEach(r => { if (!matchComments[r.play_id]) matchComments[r.play_id] = []; matchComments[r.play_id].push(r.comment_text); });
-    matchLikes = {}; (lRes.data || []).forEach(r => matchLikes[r.play_id] = (matchLikes[r.play_id] || 0) + 1);
     matchDrawings = {}; (dRes.data || []).forEach(r => { if (!matchDrawings[r.play_id]) { try { matchDrawings[r.play_id] = JSON.parse(r.drawing_data); } catch(e){} } });
 }
 
@@ -746,6 +744,24 @@ function render() {
     currentData = data;
     if (currentData.length === 0) { list.innerHTML = `<div class="empty-msg">${t('no_plays')}</div>`; return; }
 
+    function getSkillBadge(skill, effect) {
+        const map = {
+            'A': { label: 'ATK', cls: 'badge-atk' },
+            'S': { label: 'SRV', cls: 'badge-srv' },
+            'R': { label: 'RCV', cls: 'badge-rcv' },
+            'B': { label: 'BLK', cls: 'badge-blk' },
+            'D': { label: 'DIG', cls: 'badge-dig' },
+            'E': { label: 'SET', cls: 'badge-set' },
+        };
+        const info = map[skill];
+        if (!info) return '';
+        let effectCls = '';
+        if (effect === '#') effectCls = ' badge-kill';
+        else if (effect === '=') effectCls = ' badge-err';
+        else if (effect === '+') effectCls = ' badge-pos';
+        return `<span class="skill-badge ${info.cls}${effectCls}">${info.label}</span>`;
+    }
+
     let lastSet = -1;
     currentData.forEach((d, i) => {
         if (d.setNum !== lastSet) {
@@ -753,14 +769,16 @@ function render() {
             lastSet = d.setNum;
         }
 
-        const likes = matchLikes[d.id] || 0;
-        const liked = likedPlaysSession.has(d.id) ? 'style="color:#e53935; border-color:#e53935;"' : '';
         const btn = document.createElement('div');
         btn.className = `instance-btn`;
         btn.id = 'idx-'+i;
 
         if (d.side === '*') btn.style.borderLeftColor = 'var(--home-accent)';
         else if (d.side === 'a') btn.style.borderLeftColor = 'var(--away-accent)';
+
+        const skillBadge = getSkillBadge(d.skill, d.effect);
+        if (d.effect === '#') btn.classList.add('card-kill');
+        else if (d.effect === '=') btn.classList.add('card-error');
 
         const cHTML = (matchComments[d.id] || []).map((c, cidx) => `<div class="comment-item"><span>${escapeHtml(c)}</span><span class="del-comment" onclick="event.stopPropagation(); deleteComment(${d.id}, ${cidx})">&#x2716;</span></div>`).join('');
         const hasDraw = (matchDrawings[d.id] && matchDrawings[d.id].length > 0) ? 'style="background:var(--danger-subtle); color:var(--danger); font-weight:bold;"' : '';
@@ -771,12 +789,11 @@ function render() {
             <div class="card-main" onclick="playIndex(${i})">
                 <div class="score-box">${escapeHtml(d.score)}</div>
                 <div style="flex:1; line-height:1.3;">
-                    <div style="font-weight:700; font-size:0.88rem; color:var(--text);">#${escapeHtml(d.pNum)} ${escapeHtml(d.pName.split(' ')[0])}</div>
+                    <div style="font-weight:700; font-size:0.88rem; color:var(--text);">#${escapeHtml(d.pNum)} ${escapeHtml(d.pName.split(' ')[0])} ${skillBadge}</div>
                     <div style="color:var(--text-muted); font-size:0.75rem; margin-top:2px; font-weight:500;">P${escapeHtml(d.rot)} &middot; ${escapeHtml(d.skill)}${escapeHtml(d.effect)}</div>
                 </div>
             </div>
             <div class="top-right-actions">
-                <button class="action-sm-btn" ${liked} onclick="event.stopPropagation(); addLike(${d.id})">&#x1F44D; ${likes}</button>
                 <button class="action-sm-btn" ${hasDraw} onclick="event.stopPropagation(); enterDrawMode(${d.id})">&#x270F;&#xFE0F; ${t('draw_label')}</button>
                 <button class="action-sm-btn" ${noteBtnStyle} onclick="toggleActions(event, ${i})">&#x1F4AC; ${t('note_label')} ${cCount ? `(${cCount})` : ''}</button>
             </div>
@@ -917,15 +934,6 @@ async function deleteComment(playId, idx) {
     render();
 
     await supabaseClient.from('comments').delete().match({ match_dvw: currentMatchDVW, play_id: playId, comment_text: text, team_code: MY_TEAM_CODE });
-}
-
-async function addLike(playId) {
-    if (likedPlaysSession.has(playId)) return;
-    likedPlaysSession.add(playId);
-    matchLikes[playId] = (matchLikes[playId] || 0) + 1;
-    render();
-
-    await supabaseClient.from('likes').insert([{ match_dvw: currentMatchDVW, play_id: playId, team_code: MY_TEAM_CODE }]);
 }
 
 function toggleActions(event, index, forceShow = false) {
@@ -1260,7 +1268,6 @@ async function deleteMatch() {
         await Promise.all([
             supabaseClient.storage.from('dvw_files').remove([filePath]),
             supabaseClient.from('comments').delete().eq('match_dvw', currentMatchDVW).eq('team_code', MY_TEAM_CODE),
-            supabaseClient.from('likes').delete().eq('match_dvw', currentMatchDVW).eq('team_code', MY_TEAM_CODE),
             supabaseClient.from('drawings').delete().eq('match_dvw', currentMatchDVW).eq('team_code', MY_TEAM_CODE),
             supabaseClient.from('matches').delete().eq('dvw_url', currentMatchDVW).eq('team_code', MY_TEAM_CODE)
         ]);
