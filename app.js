@@ -1400,12 +1400,25 @@ async function deleteMatch() {
     }
 }
 
-// Mobile keyboard: scroll focused input into view
+// Mobile keyboard: hide video area while editing comments
+function isMobilePortrait() {
+    return window.innerWidth <= 768 && window.matchMedia('(orientation: portrait)').matches;
+}
+
 document.addEventListener('focusin', (e) => {
-    if (e.target.matches('.comment-input, .search-input')) {
-        setTimeout(() => {
-            e.target.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }, 300);
+    if (e.target.matches('.comment-input, .search-input') && isMobilePortrait()) {
+        const vid = document.getElementById('video-side');
+        if (vid) {
+            vid.style.display = 'none';
+            setTimeout(() => e.target.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 100);
+        }
+    }
+});
+
+document.addEventListener('focusout', (e) => {
+    if (e.target.matches('.comment-input, .search-input') && isMobilePortrait()) {
+        const vid = document.getElementById('video-side');
+        if (vid) vid.style.display = '';
     }
 });
 
