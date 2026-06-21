@@ -1306,5 +1306,14 @@ async function deleteMatch() {
     }
 }
 
+// Mobile keyboard: scroll focused input into view
+document.addEventListener('focusin', (e) => {
+    if (e.target.matches('.comment-input, .search-input')) {
+        setTimeout(() => {
+            e.target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }, 300);
+    }
+});
+
 // 起動！
 checkAuth();
