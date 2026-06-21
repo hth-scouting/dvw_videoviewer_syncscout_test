@@ -127,5 +127,20 @@ Deno.serve(async (req: Request) => {
     return json({ team: data, new_passcode: updates.passcode || null });
   }
 
+  // --- GENERATE SETUP TOKEN ---
+  if (action === "generate_token") {
+    const teamName = typeof body.team_name === "string" ? body.team_name.trim() : "";
+    const licenceEnd = typeof body.licence_end_date === "string" ? body.licence_end_date : "";
+    if (!teamName || !licenceEnd) return json({ error: "team_name and licence_end_date required" }, 400);
+
+    const token = crypto.randomUUID();
+    const { error } = await admin
+      .from("setup_tokens")
+      .insert({ token, team_name: teamName, licence_end_date: licenceEnd });
+    if (error) return json({ error: error.message }, 500);
+
+    return json({ token });
+  }
+
   return json({ error: "unknown_action" }, 400);
 });

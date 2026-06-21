@@ -157,7 +157,10 @@ tr:hover td { background: rgba(79,110,247,0.02); }
   <div class="container">
     <div class="actions-bar">
       <div style="font-size:0.85rem;color:var(--text-secondary)" id="teamCount">0 teams</div>
-      <button class="btn btn-primary" onclick="openCreateModal()">+ New Team</button>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-primary" onclick="openCreateModal()">+ New Team</button>
+        <button class="btn btn-outline" onclick="openTokenModal()">&#x1F517; Setup Link</button>
+      </div>
     </div>
 
     <div class="card">
@@ -213,6 +216,33 @@ tr:hover td { background: rgba(79,110,247,0.02); }
         <span class="result-value" id="resPass"></span>
       </div>
       <button class="btn btn-outline btn-sm" style="width:100%;margin-top:10px" onclick="copyCredentials()">Copy credentials</button>
+    </div>
+  </div>
+</div>
+
+<!-- Setup Token Modal -->
+<div class="modal-overlay" id="tokenModal">
+  <div class="modal">
+    <h2>Generate Setup Link</h2>
+    <p style="font-size:0.82rem;color:var(--text-muted);margin:-12px 0 20px">The user will choose their own Team ID and passcode.</p>
+    <div class="fm-group">
+      <label>Team Name</label>
+      <input type="text" id="tkName" placeholder="e.g. Blue Tigers">
+    </div>
+    <div class="fm-group">
+      <label>Licence End Date</label>
+      <input type="date" id="tkLicence">
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeTokenModal()">Cancel</button>
+      <button class="btn btn-primary" id="tkSubmit" onclick="generateToken()">Generate</button>
+    </div>
+    <div class="result-box" id="tkResult">
+      <div style="margin-bottom:8px">
+        <span class="result-label">Setup URL</span>
+      </div>
+      <input type="text" id="tkUrl" readonly style="width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;font-size:0.82rem;font-family:monospace;background:var(--bg);cursor:text" onclick="this.select()">
+      <button class="btn btn-outline btn-sm" style="width:100%;margin-top:10px" onclick="copyTokenUrl()">Copy URL</button>
     </div>
   </div>
 </div>
@@ -362,6 +392,47 @@ async function resetPasscode(id, name) {
     alert('New passcode: ' + res.new_passcode + '\n\nPlease share this with the team.');
     loadTeams();
   }
+}
+
+function openTokenModal() {
+  document.getElementById('tkName').value = '';
+  document.getElementById('tkLicence').value = '';
+  document.getElementById('tkSubmit').style.display = '';
+  document.getElementById('tkResult').classList.remove('show');
+  document.getElementById('tokenModal').classList.add('show');
+}
+
+function closeTokenModal() {
+  document.getElementById('tokenModal').classList.remove('show');
+}
+
+async function generateToken() {
+  const name = document.getElementById('tkName').value.trim();
+  const licence = document.getElementById('tkLicence').value;
+  if (!name || !licence) { alert('Please fill in team name and licence date'); return; }
+
+  const btn = document.getElementById('tkSubmit');
+  btn.disabled = true; btn.textContent = 'Generating...';
+
+  const res = await api({ action: 'generate_token', team_name: name, licence_end_date: licence });
+  btn.disabled = false; btn.textContent = 'Generate';
+
+  if (res && res.token) {
+    const base = window.location.href.replace(/\/[^/]*$/, '/');
+    const url = base + 'setup.html?token=' + res.token;
+    document.getElementById('tkUrl').value = url;
+    document.getElementById('tkResult').classList.add('show');
+    document.getElementById('tkSubmit').style.display = 'none';
+  }
+}
+
+function copyTokenUrl() {
+  const url = document.getElementById('tkUrl').value;
+  navigator.clipboard.writeText(url).then(() => {
+    const t = document.getElementById('toast');
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2000);
+  });
 }
 
 function copyCredentials() {

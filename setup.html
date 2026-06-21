@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>SyncScout — Team Setup</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f0f2f5; --surface: #fff; --text: #1a1d26; --text-secondary: #5a6072;
+  --text-muted: #8b91a0; --border: #e2e5eb; --primary: #4f6ef7; --primary-hover: #3b5de6;
+  --danger: #e53935; --success: #2e7d32; --radius: 12px;
+}
+*, *::before, *::after { box-sizing: border-box; }
+body {
+  margin: 0; font-family: 'Inter', sans-serif;
+  min-height: 100vh; display: flex; align-items: center; justify-content: center;
+  background: linear-gradient(135deg, #16192a, #1a2040);
+}
+.card {
+  background: var(--surface); border-radius: 20px; padding: 36px 32px;
+  width: 100%; max-width: 420px; box-shadow: 0 24px 80px rgba(0,0,0,0.4);
+  margin: 16px;
+}
+.brand { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+.brand-logo {
+  width: 36px; height: 36px; background: linear-gradient(135deg, #4f6ef7, #7c5ef7);
+  border-radius: 10px; display: flex; align-items: center; justify-content: center;
+  color: #fff; font-weight: 900; font-size: 1rem;
+}
+h1 { margin: 0; font-size: 1.3rem; font-weight: 800; }
+.subtitle { color: var(--text-muted); font-size: 0.85rem; margin: 0 0 28px; }
+.team-name-display {
+  background: var(--bg); border: 1px solid var(--border); border-radius: 10px;
+  padding: 12px 16px; margin-bottom: 20px; font-weight: 700; font-size: 0.95rem;
+}
+.fm-group { margin-bottom: 18px; }
+.fm-group label {
+  display: block; font-size: 0.75rem; font-weight: 600;
+  color: var(--text-secondary); margin-bottom: 6px;
+}
+.fm-group input {
+  width: 100%; padding: 12px 14px; border: 1px solid var(--border); border-radius: 10px;
+  font-size: 1rem; outline: none; font-family: inherit;
+}
+.fm-group input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(79,110,247,0.15); }
+.fm-hint { font-size: 0.72rem; color: var(--text-muted); margin-top: 5px; }
+.fm-hint.ok { color: var(--success); }
+.fm-hint.ng { color: var(--danger); }
+.slug-status { font-weight: 600; }
+.btn {
+  width: 100%; padding: 14px; border: none; border-radius: 10px; background: var(--primary);
+  color: #fff; font-size: 1rem; font-weight: 700; cursor: pointer; font-family: inherit;
+}
+.btn:hover { background: var(--primary-hover); }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.err { color: var(--danger); font-size: 0.82rem; text-align: center; min-height: 1.2em; margin-top: 14px; }
+
+.done-card { text-align: center; }
+.done-icon { font-size: 3rem; margin-bottom: 12px; }
+.done-card h2 { margin: 0 0 8px; font-size: 1.2rem; font-weight: 800; }
+.done-card p { color: var(--text-muted); font-size: 0.85rem; margin: 0 0 20px; }
+.cred-box {
+  background: var(--bg); border: 1px solid var(--border); border-radius: 10px;
+  padding: 16px; text-align: left; margin-bottom: 20px;
+}
+.cred-row { display: flex; justify-content: space-between; margin-bottom: 6px; }
+.cred-row:last-child { margin-bottom: 0; }
+.cred-label { font-size: 0.72rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; }
+.cred-value { font-family: 'IBM Plex Mono', monospace; font-weight: 700; }
+.btn-outline {
+  background: none; border: 1px solid var(--border); color: var(--text-secondary);
+  width: 100%; padding: 12px; border-radius: 10px; font-size: 0.88rem;
+  font-weight: 600; cursor: pointer; margin-bottom: 10px; font-family: inherit;
+}
+.btn-outline:hover { background: var(--bg); }
+
+/* Invalid-token / loading states */
+.state-msg { text-align: center; padding: 40px 0; }
+.state-msg h2 { font-size: 1.1rem; margin: 0 0 8px; }
+.state-msg p { color: var(--text-muted); font-size: 0.85rem; margin: 0; }
+.spinner {
+  width: 32px; height: 32px; border: 3px solid var(--border);
+  border-top-color: var(--primary); border-radius: 50%;
+  animation: spin 0.7s linear infinite; margin: 0 auto 16px;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+
+<div class="card" id="card">
+  <!-- Loading -->
+  <div id="state-loading" class="state-msg">
+    <div class="spinner"></div>
+    <p>Verifying setup link...</p>
+  </div>
+
+  <!-- Invalid token -->
+  <div id="state-invalid" style="display:none" class="state-msg">
+    <h2>Invalid or expired link</h2>
+    <p>This setup link is no longer valid.<br>Please contact your administrator.</p>
+  </div>
+
+  <!-- Setup form -->
+  <div id="state-form" style="display:none">
+    <div class="brand">
+      <div class="brand-logo">S</div>
+      <h1>Team Setup</h1>
+    </div>
+    <p class="subtitle">Choose your Team ID and passcode to get started.</p>
+
+    <div class="team-name-display" id="teamNameDisplay"></div>
+
+    <div class="fm-group">
+      <label>Team ID (used to log in)</label>
+      <input type="text" id="slugInput" placeholder="e.g. blue-tigers" autocomplete="off"
+             oninput="onSlugInput()">
+      <div class="fm-hint">
+        3-32 characters, lowercase letters, numbers, hyphens. Must start and end with a letter or number.
+        <div class="slug-status" id="slugStatus"></div>
+      </div>
+    </div>
+
+    <div class="fm-group">
+      <label>Passcode</label>
+      <input type="password" id="passInput" placeholder="4 characters or more" autocomplete="new-password">
+      <div class="fm-hint">This is the shared passcode for your team to log in.</div>
+    </div>
+
+    <div class="fm-group">
+      <label>Confirm Passcode</label>
+      <input type="password" id="passConfirm" placeholder="Re-enter passcode" autocomplete="new-password">
+    </div>
+
+    <button class="btn" id="submitBtn" onclick="submitSetup()">Create Team</button>
+    <div class="err" id="errMsg"></div>
+  </div>
+
+  <!-- Done -->
+  <div id="state-done" style="display:none" class="done-card">
+    <div class="done-icon">&#x2705;</div>
+    <h2>Team Created!</h2>
+    <p>Share these credentials with your team members.</p>
+    <div class="cred-box">
+      <div class="cred-row">
+        <span class="cred-label">Team ID</span>
+        <span class="cred-value" id="doneSlug"></span>
+      </div>
+      <div class="cred-row">
+        <span class="cred-label">Passcode</span>
+        <span class="cred-value" id="donePass"></span>
+      </div>
+    </div>
+    <button class="btn-outline" onclick="copyCreds()">Copy credentials</button>
+    <button class="btn" onclick="goToApp()">Open SyncScout</button>
+  </div>
+</div>
+
+<script>
+const SUPABASE_URL = 'https://ciokifeakrkigonhwbyf.supabase.co';
+const API_URL = `${SUPABASE_URL}/functions/v1/setup-team`;
+
+const params = new URLSearchParams(window.location.search);
+const setupToken = params.get('token') || '';
+let slugCheckTimer = null;
+
+async function api(body) {
+  const res = await fetch(API_URL, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+  return res.json();
+}
+
+function show(id) {
+  ['state-loading', 'state-invalid', 'state-form', 'state-done'].forEach(s =>
+    document.getElementById(s).style.display = s === id ? '' : 'none'
+  );
+}
+
+async function init() {
+  if (!setupToken) { show('state-invalid'); return; }
+
+  const res = await api({ action: 'validate', token: setupToken });
+  if (res.error) { show('state-invalid'); return; }
+
+  document.getElementById('teamNameDisplay').textContent = res.team_name;
+  show('state-form');
+}
+
+function onSlugInput() {
+  const slug = document.getElementById('slugInput').value.trim().toLowerCase();
+  const status = document.getElementById('slugStatus');
+
+  if (!slug) { status.textContent = ''; status.className = 'slug-status'; return; }
+
+  if (slug.length < 3 || !/^[a-z0-9][a-z0-9-]*[a-z0-9]$/.test(slug)) {
+    status.textContent = 'Invalid format';
+    status.className = 'slug-status ng';
+    return;
+  }
+
+  status.textContent = 'Checking...';
+  status.className = 'slug-status';
+
+  clearTimeout(slugCheckTimer);
+  slugCheckTimer = setTimeout(async () => {
+    const res = await api({ action: 'check_slug', slug });
+    if (res.available) {
+      status.textContent = 'Available!';
+      status.className = 'slug-status ok';
+    } else {
+      status.textContent = 'Already taken';
+      status.className = 'slug-status ng';
+    }
+  }, 400);
+}
+
+async function submitSetup() {
+  const slug = document.getElementById('slugInput').value.trim().toLowerCase();
+  const pass = document.getElementById('passInput').value;
+  const confirm = document.getElementById('passConfirm').value;
+  const err = document.getElementById('errMsg');
+  const btn = document.getElementById('submitBtn');
+
+  err.textContent = '';
+
+  if (!slug || slug.length < 3 || !/^[a-z0-9][a-z0-9-]*[a-z0-9]$/.test(slug)) {
+    err.textContent = 'Please enter a valid Team ID.';
+    return;
+  }
+  if (pass.length < 4) {
+    err.textContent = 'Passcode must be at least 4 characters.';
+    return;
+  }
+  if (pass !== confirm) {
+    err.textContent = 'Passcodes do not match.';
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = 'Creating...';
+
+  const res = await api({ action: 'setup', token: setupToken, slug, passcode: pass });
+
+  if (res.error) {
+    btn.disabled = false;
+    btn.textContent = 'Create Team';
+    const msgs = {
+      invalid_token: 'This setup link is no longer valid.',
+      token_used: 'This setup link has already been used.',
+      slug_taken: 'This Team ID is already taken. Please choose another.',
+      passcode_too_short: 'Passcode must be at least 4 characters.',
+      invalid_slug: 'Invalid Team ID format.',
+    };
+    err.textContent = msgs[res.error] || ('Error: ' + res.error);
+    return;
+  }
+
+  document.getElementById('doneSlug').textContent = slug;
+  document.getElementById('donePass').textContent = pass;
+  show('state-done');
+}
+
+function copyCreds() {
+  const slug = document.getElementById('doneSlug').textContent;
+  const pass = document.getElementById('donePass').textContent;
+  navigator.clipboard.writeText(`Team ID: ${slug}\nPasscode: ${pass}`);
+}
+
+function goToApp() {
+  window.location.href = './index.html';
+}
+
+init();
+</script>
+</body>
+</html>
