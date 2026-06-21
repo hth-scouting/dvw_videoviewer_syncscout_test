@@ -87,6 +87,17 @@ const i18n = {
         stats_label: " Stats",
         rotation_label: " Rotation",
         player_col: "Player",
+        change_passcode: "Change Passcode",
+        cp_title: "Change Passcode",
+        cp_current: "Current passcode",
+        cp_new: "New passcode",
+        cp_confirm: "Confirm new passcode",
+        cp_btn: "Change",
+        cp_changing: "Changing...",
+        cp_mismatch: "New passcodes do not match.",
+        cp_short: "Passcode must be at least 4 characters.",
+        cp_success: "Passcode changed! Please share the new passcode with your team.",
+        cp_fail: "Current passcode is incorrect.",
     },
     ja: {
         select_match: "試合を選択...",
@@ -138,6 +149,17 @@ const i18n = {
         select_team_msg: "チームを選択してください",
         no_data_msg: "まだ試合データがありません。\n「＋ 試合追加」から追加してください。",
         confirm_logout: "ログアウトしますか？",
+        change_passcode: "パスコード変更",
+        cp_title: "パスコード変更",
+        cp_current: "現在のパスコード",
+        cp_new: "新しいパスコード",
+        cp_confirm: "新しいパスコード（確認）",
+        cp_btn: "変更する",
+        cp_changing: "変更中...",
+        cp_mismatch: "新しいパスコードが一致しません。",
+        cp_short: "パスコードは4文字以上にしてください。",
+        cp_success: "パスコードを変更しました！チームメンバーに新しいパスコードを共有してください。",
+        cp_fail: "現在のパスコードが正しくありません。",
         confirm_delete_comment: "削除しますか？",
         upload_all_required: "全て入力してください",
         upload_success: "追加しました！",
@@ -226,6 +248,7 @@ document.addEventListener('click', (e) => {
 const SUPABASE_URL = 'https://ciokifeakrkigonhwbyf.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNpb2tpZmVha3JraWdvbmh3YnlmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ5ODQxNjgsImV4cCI6MjA5MDU2MDE2OH0.NYqH52Rl7Gn9SKeF3mnDioEphpoKpCDrxv6NifU69Po';
 const LOGIN_FN_URL = `${SUPABASE_URL}/functions/v1/team-login`;
+const CHANGE_PASSCODE_FN_URL = `${SUPABASE_URL}/functions/v1/change-passcode`;
 
 let MY_TEAM_CODE = null;
 let MY_TEAM_SLUG = null;
@@ -1272,6 +1295,67 @@ function sharePlaylist() {
     const text = `SyncScout: ${currentData.length} plays playlist\n`;
     const lineUrl = `https://line.me/R/msg/text/?${encodeURIComponent(text + url)}`;
     window.open(lineUrl, '_blank');
+}
+
+// --- パスコード変更 ---
+function openChangePasscode() {
+    const existing = document.getElementById('cp-modal');
+    if (existing) existing.remove();
+
+    const m = document.createElement('div');
+    m.id = 'cp-modal';
+    m.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:1000;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px)';
+    m.innerHTML = `
+        <div style="background:#fff;border-radius:16px;padding:28px;width:90%;max-width:380px;box-shadow:0 20px 60px rgba(0,0,0,0.25)">
+            <h3 style="margin:0 0 18px;font-size:1.1rem;font-weight:700">${t('cp_title')}</h3>
+            <input type="password" id="cp-current" placeholder="${t('cp_current')}" style="width:100%;padding:10px 12px;border:1px solid #ddd;border-radius:8px;font-size:0.9rem;margin-bottom:12px;box-sizing:border-box">
+            <input type="text" id="cp-new" placeholder="${t('cp_new')}" style="width:100%;padding:10px 12px;border:1px solid #ddd;border-radius:8px;font-size:0.9rem;margin-bottom:12px;box-sizing:border-box">
+            <input type="text" id="cp-confirm" placeholder="${t('cp_confirm')}" style="width:100%;padding:10px 12px;border:1px solid #ddd;border-radius:8px;font-size:0.9rem;margin-bottom:16px;box-sizing:border-box">
+            <div style="display:flex;gap:8px;justify-content:flex-end">
+                <button id="cp-cancel" style="padding:10px 18px;border:1px solid #ddd;border-radius:8px;background:none;font-weight:600;cursor:pointer">Cancel</button>
+                <button id="cp-submit" style="padding:10px 18px;border:none;border-radius:8px;background:#4f6ef7;color:#fff;font-weight:700;cursor:pointer">${t('cp_btn')}</button>
+            </div>
+            <div id="cp-msg" style="margin-top:12px;font-size:0.82rem;text-align:center;min-height:1.2em"></div>
+        </div>`;
+    document.body.appendChild(m);
+
+    m.addEventListener('click', (e) => { if (e.target === m) m.remove(); });
+    document.getElementById('cp-cancel').onclick = () => m.remove();
+    document.getElementById('cp-submit').onclick = submitChangePasscode;
+}
+
+async function submitChangePasscode() {
+    const cur = document.getElementById('cp-current').value.trim();
+    const nw = document.getElementById('cp-new').value.trim();
+    const cf = document.getElementById('cp-confirm').value.trim();
+    const msg = document.getElementById('cp-msg');
+    const btn = document.getElementById('cp-submit');
+
+    msg.style.color = '#e53935';
+    if (nw !== cf) { msg.textContent = t('cp_mismatch'); return; }
+    if (nw.length < 4) { msg.textContent = t('cp_short'); return; }
+
+    btn.disabled = true; btn.textContent = t('cp_changing');
+    try {
+        const res = await fetch(CHANGE_PASSCODE_FN_URL, {
+            method: 'POST',
+            headers: { 'content-type': 'application/json', 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` },
+            body: JSON.stringify({ slug: MY_TEAM_SLUG, current_passcode: cur, new_passcode: nw }),
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) {
+            msg.textContent = t('cp_fail');
+            btn.disabled = false; btn.textContent = t('cp_btn');
+            return;
+        }
+        msg.style.color = '#2e7d32';
+        msg.textContent = t('cp_success');
+        clearAuth();
+        setTimeout(() => { document.getElementById('cp-modal')?.remove(); location.reload(); }, 3000);
+    } catch {
+        msg.textContent = t('cp_fail');
+        btn.disabled = false; btn.textContent = t('cp_btn');
+    }
 }
 
 // --- 試合削除 ---
