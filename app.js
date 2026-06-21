@@ -25,7 +25,7 @@ const i18n = {
         search_comments: "Search Comments / Tags",
         search_placeholder: "Keyword (e.g. #MB, #Good)",
         copy_url: "Copy URL",
-        share_line: "Share LINE",
+        share_list: "Share List",
         auto_skip: "Auto-Skip",
         add_new_match: "Add New Match",
         category: "Category",
@@ -82,7 +82,7 @@ const i18n = {
         draw_label: "Draw",
         note_label: "Note",
         copy_link: "Copy Link",
-        send_line: "Send LINE",
+        share_play: "Share",
         serves: " Serves",
         stats_label: " Stats",
         rotation_label: " Rotation",
@@ -120,7 +120,7 @@ const i18n = {
         search_comments: "コメント・タグ検索",
         search_placeholder: "キーワード（例: #MB, #Good）",
         copy_url: "URLコピー",
-        share_line: "LINE共有",
+        share_list: "リスト共有",
         auto_skip: "自動スキップ",
         add_new_match: "新しい試合を追加",
         category: "カテゴリ",
@@ -188,7 +188,7 @@ const i18n = {
         draw_label: "描画",
         note_label: "ノート",
         copy_link: "リンクコピー",
-        send_line: "LINE送信",
+        share_play: "共有",
         serves: " サーブ",
         stats_label: " 統計",
         rotation_label: " ローテ",
@@ -856,7 +856,7 @@ function render() {
                 </div>
                 <div class="action-row" style="margin-top: 5px;">
                     <button class="action-btn copy-link-btn" onclick="event.stopPropagation(); copyPlayLink(${i})">&#x1F517; ${t('copy_link')}</button>
-                    <button class="action-btn line-btn" onclick="event.stopPropagation(); sendLine(${i})">&#x1F7E2; ${t('send_line')}</button>
+                    <button class="action-btn line-btn" onclick="event.stopPropagation(); sharePlay(${i})">&#x1F4E4; ${t('share_play')}</button>
                 </div>
             </div>`;
         list.appendChild(btn);
@@ -1254,7 +1254,7 @@ function copyPlayLink(index) {
     });
 }
 
-function sendLine(index) {
+function sharePlay(index) {
     const d = currentData[index];
     if (!d) return;
     const url = new URL(window.location.href);
@@ -1263,9 +1263,14 @@ function sendLine(index) {
     url.searchParams.set('key', MY_TEAM_CODE);
     url.searchParams.set('team', MY_TEAM_SLUG);
 
-    const text = `SyncScout: Set${d.setNum} [${d.score}] #${d.pNum} ${d.pName}\n`;
-    const lineUrl = `https://line.me/R/msg/text/?${encodeURIComponent(text + url.toString())}`;
-    window.open(lineUrl, '_blank');
+    const title = `SyncScout: Set${d.setNum} [${d.score}] #${d.pNum} ${d.pName}`;
+    if (navigator.share) {
+        navigator.share({ title: title, url: url.toString() }).catch(() => {});
+    } else {
+        navigator.clipboard.writeText(title + '\n' + url.toString()).then(() => {
+            alert(t('link_copied'));
+        }).catch(err => { alert(t('copy_fail') + err); });
+    }
 }
 
 function getPlaylistURL() {
@@ -1292,9 +1297,14 @@ function sharePlaylist() {
     const url = getPlaylistURL();
     if (!url) return alert(t('no_plays_to_share'));
 
-    const text = `SyncScout: ${currentData.length} plays playlist\n`;
-    const lineUrl = `https://line.me/R/msg/text/?${encodeURIComponent(text + url)}`;
-    window.open(lineUrl, '_blank');
+    const title = `SyncScout: ${currentData.length} plays playlist`;
+    if (navigator.share) {
+        navigator.share({ title: title, url: url }).catch(() => {});
+    } else {
+        navigator.clipboard.writeText(title + '\n' + url).then(() => {
+            alert(t('playlist_copied', { n: currentData.length }));
+        }).catch(err => { alert(t('copy_fail') + err); });
+    }
 }
 
 // --- パスコード変更 ---

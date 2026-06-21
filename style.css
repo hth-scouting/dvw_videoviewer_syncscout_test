@@ -303,7 +303,7 @@ select:focus, .search-input:focus { border-color: var(--primary); box-shadow: 0 
 }
 .share-btn.copy { background: var(--bg); color: var(--text-secondary); border: 1px solid var(--border); }
 .share-btn.copy:hover { background: var(--border-light); }
-.share-btn.line { background: var(--line-green); color: white; }
+.share-btn.line { background: var(--primary); color: white; }
 .share-btn.line:hover { filter: brightness(1.08); }
 
 .auto-skip-label {
@@ -437,7 +437,7 @@ select:focus, .search-input:focus { border-color: var(--primary); box-shadow: 0 
 .add-btn:hover { background: var(--primary-hover); }
 .copy-link-btn { background: var(--text-secondary); flex: 1; display: flex; align-items: center; justify-content: center; gap: 4px; }
 .copy-link-btn:hover { background: var(--text); }
-.line-btn { background: var(--line-green); flex: 1; display: flex; align-items: center; justify-content: center; gap: 4px; }
+.line-btn { background: var(--primary); flex: 1; display: flex; align-items: center; justify-content: center; gap: 4px; }
 .line-btn:hover { filter: brightness(1.08); }
 
 .tag-popup {
