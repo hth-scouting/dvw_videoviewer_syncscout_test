@@ -299,9 +299,11 @@ function openCreateModal() {
   document.getElementById('editId').value = '';
   document.getElementById('fmName').value = '';
   document.getElementById('fmSlug').value = '';
+  document.getElementById('fmSlug').disabled = false;
   document.getElementById('fmLicence').value = '';
   document.getElementById('fmActiveGroup').style.display = 'none';
   document.getElementById('modalSubmit').textContent = 'Create';
+  document.getElementById('modalSubmit').style.display = '';
   document.getElementById('resultBox').classList.remove('show');
   document.getElementById('modal').classList.add('show');
 }
@@ -316,6 +318,7 @@ function openEditModal(id, name, slug, licence, active) {
   document.getElementById('fmActiveGroup').style.display = 'block';
   document.getElementById('fmActive').value = String(active);
   document.getElementById('modalSubmit').textContent = 'Save';
+  document.getElementById('modalSubmit').style.display = '';
   document.getElementById('resultBox').classList.remove('show');
   document.getElementById('modal').classList.add('show');
 }
