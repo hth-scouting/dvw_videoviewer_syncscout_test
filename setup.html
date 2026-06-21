@@ -18,11 +18,19 @@ body {
   min-height: 100vh; display: flex; align-items: center; justify-content: center;
   background: linear-gradient(135deg, #16192a, #1a2040);
 }
+html.ja .en, html.en .ja { display: none; }
 .card {
   background: var(--surface); border-radius: 20px; padding: 36px 32px;
   width: 100%; max-width: 420px; box-shadow: 0 24px 80px rgba(0,0,0,0.4);
-  margin: 16px;
+  margin: 16px; position: relative;
 }
+.lang-toggle {
+  position: absolute; top: 16px; right: 16px;
+  background: var(--bg); border: 1px solid var(--border); border-radius: 8px;
+  padding: 4px 10px; font-size: 0.72rem; font-weight: 700; cursor: pointer;
+  color: var(--text-secondary); font-family: inherit;
+}
+.lang-toggle:hover { background: var(--border); }
 .brand { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
 .brand-logo {
   width: 36px; height: 36px; background: linear-gradient(135deg, #4f6ef7, #7c5ef7);
@@ -76,7 +84,6 @@ h1 { margin: 0; font-size: 1.3rem; font-weight: 800; }
 }
 .btn-outline:hover { background: var(--bg); }
 
-/* Invalid-token / loading states */
 .state-msg { text-align: center; padding: 40px 0; }
 .state-msg h2 { font-size: 1.1rem; margin: 0 0 8px; }
 .state-msg p { color: var(--text-muted); font-size: 0.85rem; margin: 0; }
@@ -91,70 +98,75 @@ h1 { margin: 0; font-size: 1.3rem; font-weight: 800; }
 <body>
 
 <div class="card" id="card">
+  <button class="lang-toggle" onclick="toggleLang()">
+    <span class="en">日本語</span><span class="ja">English</span>
+  </button>
+
   <!-- Loading -->
   <div id="state-loading" class="state-msg">
     <div class="spinner"></div>
-    <p>Verifying setup link...</p>
+    <p><span class="en">Verifying setup link...</span><span class="ja">セットアップリンクを確認中...</span></p>
   </div>
 
   <!-- Invalid token -->
   <div id="state-invalid" style="display:none" class="state-msg">
-    <h2>Invalid or expired link</h2>
-    <p>This setup link is no longer valid.<br>Please contact your administrator.</p>
+    <h2><span class="en">Invalid or expired link</span><span class="ja">無効または期限切れのリンク</span></h2>
+    <p><span class="en">This setup link is no longer valid.<br>Please contact your administrator.</span><span class="ja">このセットアップリンクは無効です。<br>管理者にお問い合わせください。</span></p>
   </div>
 
   <!-- Setup form -->
   <div id="state-form" style="display:none">
     <div class="brand">
       <div class="brand-logo">S</div>
-      <h1>Team Setup</h1>
+      <h1><span class="en">Team Setup</span><span class="ja">チームセットアップ</span></h1>
     </div>
-    <p class="subtitle">Choose your Team ID and passcode to get started.</p>
+    <p class="subtitle"><span class="en">Choose your Team ID and passcode to get started.</span><span class="ja">チームIDとパスコードを設定してください。</span></p>
 
     <div class="team-name-display" id="teamNameDisplay"></div>
 
     <div class="fm-group">
-      <label>Team ID (used to log in)</label>
+      <label><span class="en">Team ID (used to log in)</span><span class="ja">チームID（ログインに使用）</span></label>
       <input type="text" id="slugInput" placeholder="e.g. blue-tigers" autocomplete="off"
-             oninput="onSlugInput()">
+             oninput="sanitizeSlug(); onSlugInput()">
       <div class="fm-hint">
-        3-32 characters, lowercase letters, numbers, hyphens. Must start and end with a letter or number.
+        <span class="en">3-32 characters, lowercase letters, numbers, hyphens. Must start and end with a letter or number.</span>
+        <span class="ja">3〜32文字、半角英小文字・数字・ハイフンのみ。先頭と末尾は英数字にしてください。</span>
         <div class="slug-status" id="slugStatus"></div>
       </div>
     </div>
 
     <div class="fm-group">
-      <label>Passcode</label>
-      <input type="password" id="passInput" placeholder="4 characters or more" autocomplete="new-password">
-      <div class="fm-hint">This is the shared passcode for your team to log in.</div>
+      <label><span class="en">Passcode</span><span class="ja">パスコード</span></label>
+      <input type="password" id="passInput" placeholder="" autocomplete="new-password">
+      <div class="fm-hint"><span class="en">This is the shared passcode for your team to log in.</span><span class="ja">チーム全員がログインに使う共有パスコードです。</span></div>
     </div>
 
     <div class="fm-group">
-      <label>Confirm Passcode</label>
-      <input type="password" id="passConfirm" placeholder="Re-enter passcode" autocomplete="new-password">
+      <label><span class="en">Confirm Passcode</span><span class="ja">パスコード（確認）</span></label>
+      <input type="password" id="passConfirm" placeholder="" autocomplete="new-password">
     </div>
 
-    <button class="btn" id="submitBtn" onclick="submitSetup()">Create Team</button>
+    <button class="btn" id="submitBtn" onclick="submitSetup()"><span class="en">Create Team</span><span class="ja">チームを作成</span></button>
     <div class="err" id="errMsg"></div>
   </div>
 
   <!-- Done -->
   <div id="state-done" style="display:none" class="done-card">
     <div class="done-icon">&#x2705;</div>
-    <h2>Team Created!</h2>
-    <p>Share these credentials with your team members.</p>
+    <h2><span class="en">Team Created!</span><span class="ja">チームを作成しました！</span></h2>
+    <p><span class="en">Share these credentials with your team members.</span><span class="ja">以下の情報をチームメンバーに共有してください。</span></p>
     <div class="cred-box">
       <div class="cred-row">
-        <span class="cred-label">Team ID</span>
+        <span class="cred-label"><span class="en">Team ID</span><span class="ja">チームID</span></span>
         <span class="cred-value" id="doneSlug"></span>
       </div>
       <div class="cred-row">
-        <span class="cred-label">Passcode</span>
+        <span class="cred-label"><span class="en">Passcode</span><span class="ja">パスコード</span></span>
         <span class="cred-value" id="donePass"></span>
       </div>
     </div>
-    <button class="btn-outline" onclick="copyCreds()">Copy credentials</button>
-    <button class="btn" onclick="goToApp()">Open SyncScout</button>
+    <button class="btn-outline" onclick="copyCreds()"><span class="en">Copy credentials</span><span class="ja">コピーする</span></button>
+    <button class="btn" onclick="goToApp()"><span class="en">Open SyncScout</span><span class="ja">SyncScoutを開く</span></button>
   </div>
 </div>
 
@@ -165,6 +177,28 @@ const API_URL = `${SUPABASE_URL}/functions/v1/setup-team`;
 const params = new URLSearchParams(window.location.search);
 const setupToken = params.get('token') || '';
 let slugCheckTimer = null;
+let currentLang = navigator.language.startsWith('ja') ? 'ja' : 'en';
+
+function applyLang() {
+  document.documentElement.className = currentLang;
+  updatePlaceholders();
+}
+
+function toggleLang() {
+  currentLang = currentLang === 'en' ? 'ja' : 'en';
+  applyLang();
+}
+
+function updatePlaceholders() {
+  const ph = currentLang === 'ja'
+    ? { slug: '例: blue-tigers', pass: '4文字以上', confirm: 'もう一度入力' }
+    : { slug: 'e.g. blue-tigers', pass: '4 characters or more', confirm: 'Re-enter passcode' };
+  document.getElementById('slugInput').placeholder = ph.slug;
+  document.getElementById('passInput').placeholder = ph.pass;
+  document.getElementById('passConfirm').placeholder = ph.confirm;
+}
+
+function tt(en, ja) { return currentLang === 'ja' ? ja : en; }
 
 async function api(body) {
   const res = await fetch(API_URL, {
@@ -182,6 +216,7 @@ function show(id) {
 }
 
 async function init() {
+  applyLang();
   if (!setupToken) { show('state-invalid'); return; }
 
   const res = await api({ action: 'validate', token: setupToken });
@@ -191,6 +226,15 @@ async function init() {
   show('state-form');
 }
 
+function sanitizeSlug() {
+  const el = document.getElementById('slugInput');
+  const pos = el.selectionStart;
+  const before = el.value;
+  el.value = before.toLowerCase().replace(/[^a-z0-9-]/g, '').replace(/--+/g, '-');
+  const diff = before.length - el.value.length;
+  el.setSelectionRange(pos - diff, pos - diff);
+}
+
 function onSlugInput() {
   const slug = document.getElementById('slugInput').value.trim().toLowerCase();
   const status = document.getElementById('slugStatus');
@@ -198,22 +242,22 @@ function onSlugInput() {
   if (!slug) { status.textContent = ''; status.className = 'slug-status'; return; }
 
   if (slug.length < 3 || !/^[a-z0-9][a-z0-9-]*[a-z0-9]$/.test(slug)) {
-    status.textContent = 'Invalid format';
+    status.textContent = tt('Invalid format', '形式が正しくありません');
     status.className = 'slug-status ng';
     return;
   }
 
-  status.textContent = 'Checking...';
+  status.textContent = tt('Checking...', '確認中...');
   status.className = 'slug-status';
 
   clearTimeout(slugCheckTimer);
   slugCheckTimer = setTimeout(async () => {
     const res = await api({ action: 'check_slug', slug });
     if (res.available) {
-      status.textContent = 'Available!';
+      status.textContent = tt('Available!', '利用可能です！');
       status.className = 'slug-status ok';
     } else {
-      status.textContent = 'Already taken';
+      status.textContent = tt('Already taken', '既に使用されています');
       status.className = 'slug-status ng';
     }
   }, 400);
@@ -229,32 +273,34 @@ async function submitSetup() {
   err.textContent = '';
 
   if (!slug || slug.length < 3 || !/^[a-z0-9][a-z0-9-]*[a-z0-9]$/.test(slug)) {
-    err.textContent = 'Please enter a valid Team ID.';
+    err.textContent = tt('Please enter a valid Team ID.', '有効なチームIDを入力してください。');
     return;
   }
   if (pass.length < 4) {
-    err.textContent = 'Passcode must be at least 4 characters.';
+    err.textContent = tt('Passcode must be at least 4 characters.', 'パスコードは4文字以上にしてください。');
     return;
   }
   if (pass !== confirm) {
-    err.textContent = 'Passcodes do not match.';
+    err.textContent = tt('Passcodes do not match.', 'パスコードが一致しません。');
     return;
   }
 
   btn.disabled = true;
-  btn.textContent = 'Creating...';
+  btn.querySelector('.en').textContent = 'Creating...';
+  btn.querySelector('.ja').textContent = '作成中...';
 
   const res = await api({ action: 'setup', token: setupToken, slug, passcode: pass });
 
   if (res.error) {
     btn.disabled = false;
-    btn.textContent = 'Create Team';
+    btn.querySelector('.en').textContent = 'Create Team';
+    btn.querySelector('.ja').textContent = 'チームを作成';
     const msgs = {
-      invalid_token: 'This setup link is no longer valid.',
-      token_used: 'This setup link has already been used.',
-      slug_taken: 'This Team ID is already taken. Please choose another.',
-      passcode_too_short: 'Passcode must be at least 4 characters.',
-      invalid_slug: 'Invalid Team ID format.',
+      invalid_token: tt('This setup link is no longer valid.', 'このセットアップリンクは無効です。'),
+      token_used: tt('This setup link has already been used.', 'このリンクは既に使用済みです。'),
+      slug_taken: tt('This Team ID is already taken. Please choose another.', 'このチームIDは既に使われています。別のIDを選んでください。'),
+      passcode_too_short: tt('Passcode must be at least 4 characters.', 'パスコードは4文字以上にしてください。'),
+      invalid_slug: tt('Invalid Team ID format.', 'チームIDの形式が正しくありません。'),
     };
     err.textContent = msgs[res.error] || ('Error: ' + res.error);
     return;
