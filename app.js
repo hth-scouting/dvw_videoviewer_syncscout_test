@@ -2,6 +2,119 @@
 // app.js  v2.0 — i18n + UI refresh
 // =====================================================================
 
+// --- Demo mode ---
+const IS_DEMO = new URLSearchParams(window.location.search).has('demo');
+const DEMO_YOUTUBE_ID = '8ZhxpGVlk4o';
+const DEMO_DVW = `[3DATAVOLLEYSCOUT]
+FILEFORMAT: 2.0
+[3MATCH]
+08/10/2024;11.00.00;2015/2016;;;;;526302;;1;;Z;
+;;;;;;;;
+[3TEAMS]
+FRA;France National Team (Men's);3;;;;
+POL;Poland National Team (Men's);0;;;;
+[3MORE]
+;;;;;VolleyMetrics;
+;;;
+[3COMMENTS]
+;;;;
+[3SET]
+True;8-6;16-11;21-16;25-19;25;
+True;6-8;15-16;21-19;25-20;25;
+True;8-7;14-16;21-18;25-23;25;
+True;;;;;25;
+True;;;;;15;
+[3PLAYERS-H]
+0;1;1;2;2;2;;;-390554;Chinenyeze;Barthelemy;Chinenyeze;;;False;;;
+0;2;2;*;*;*;;;-390555;Grebennikov;Jenia;Grebennikov;L;1;False;;;
+0;4;4;3;3;3;;;-55008;Patry;Jean;Patry;;;False;;;
+0;9;9;1;1;1;;;-390559;N'Gapeth;Earvin;N'Gapeth;;;False;;;
+0;11;11;6;6;6;;;-390560;Brizard;Antoine;Brizard;;;False;;;
+0;14;14;5;5;5;;;12021;Le Goff;Nicolas le;Le Goff;;;False;;;
+0;17;17;4;4;4;;;12010;Clevenot;Trevor;Clevenot;;;False;;;
+[3PLAYERS-V]
+1;6;38;3;3;3;;;12143;Kurek;Bartosz;Kurek;;;False;;;
+1;9;41;4;4;4;;;-279128;Wilfredo;Leon;Wilfredo;;;False;;;
+1;15;46;5;5;5;;;-74585;Kochanowski;Jakub;Kochanowski;;;False;;;
+1;17;48;*;*;*;;;12170;Zatorski;Pawel;Zatorski;L;1;False;;;
+1;19;50;6;6;6;;;-206639;Janusz;Marcin;Janusz;;;False;;;
+1;21;52;1;1;1;;;-206642;Fornal;Tomasz;Fornal;;;False;;;
+1;99;76;2;2;2;;;-279134;Norbert;Huber;Norbert;;;False;;;
+[3ATTACKCOMBINATION]
+[3SETTERCALL]
+K1;;Quick ahead;;16711680;3949;4549;4949;;12632256;
+KM;;Push;;16711680;3949;3949;4949;6226,5026,5037,6237,;12632256;
+K2;;Quick behind;;16711680;3864;4278;4974;;255;
+[3WINNINGSYMBOLS]
+=~~~#~~~=~~~~~~~=/~~#~~~=/~~#~~~~~~~~~~~=/~~~~~~=~~~~~~~
+[3RESERVE]
+[3SCOUT]
+*P11>LUp;;;;;;;;1;6;6;1;739;;9;1;4;17;14;11;21;99;6;9;15;19;
+*z6>LUp;;;;;;;;1;6;6;1;739;;9;1;4;17;14;11;21;99;6;9;15;19;
+aP19>LUp;;;;;;;;1;6;6;1;739;;9;1;4;17;14;11;21;99;6;9;15;19;
+az6>LUp;;;;;;;;1;6;6;1;739;;9;1;4;17;14;11;21;99;6;9;15;19;
+*09SQ=~~~11D~~~00;;;;0583;-1-1;9735;;1;6;6;1;739;;9;1;4;17;14;11;21;99;6;9;15;19;
+ap00:01;;;;0365;-1-1;;;1;6;6;1;740;;9;1;4;17;14;11;21;99;6;9;15;19;
+aP19;;;;;;;;1;6;5;1;757;;9;1;4;17;14;11;99;6;9;15;19;21;
+az5;;;;;;;;1;6;5;1;757;;9;1;4;17;14;11;99;6;9;15;19;21;
+*P11;;;;;;;;1;6;5;1;757;;9;1;4;17;14;11;99;6;9;15;19;21;
+*z6;;;;;;;;1;6;5;1;757;;9;1;4;17;14;11;99;6;9;15;19;21;
+a99SQ-~~~19D~~~+1;;;;0383;-1-1;7234;;1;6;5;1;757;;9;1;4;17;14;11;99;6;9;15;19;21;
+*09RQ#~~~19DR~~-1B;;;;0383;-1-1;7234;;1;6;5;1;758;;9;1;4;17;14;11;99;6;9;15;19;21;
+*11ET#KMB~3A~~~-1;;;;4360;-1-1;-1-1;;1;6;5;1;759;;9;1;4;17;14;11;99;6;9;15;19;21;
+*04AT#X6~24DT2~-1F;;;;4285;-1-1;5787;;1;6;5;1;760;;9;1;4;17;14;11;99;6;9;15;19;21;
+*p01:01;;;;4313;-1-1;;;1;6;5;1;761;;9;1;4;17;14;11;99;6;9;15;19;21;
+*P11;;;;;;;;1;5;5;1;782;;1;4;17;14;11;9;99;6;9;15;19;21;
+*z5;;;;;;;;1;5;5;1;782;;1;4;17;14;11;9;99;6;9;15;19;21;
+aP19;;;;;;;;1;5;5;1;782;;1;4;17;14;11;9;99;6;9;15;19;21;
+az5;;;;;;;;1;5;5;1;782;;1;4;17;14;11;9;99;6;9;15;19;21;
+*01SM!~~~57A~~~00;;;;0516;-1-1;7374;;1;5;5;1;782;;1;4;17;14;11;9;99;6;9;15;19;21;
+a21RM!~~~57AO~~00B;;;;0516;-1-1;7374;;1;5;5;1;783;;1;4;17;14;11;9;99;6;9;15;19;21;
+a19ET#K1B~3D~~~00;;;;4344;-1-1;-1-1;;1;5;5;1;784;;1;4;17;14;11;9;99;6;9;15;19;21;
+a06AT+X6~25BT2~00F;;;;4284;5380;7869;;1;5;5;1;785;;1;4;17;14;11;9;99;6;9;15;19;21;
+*14BT/~~~~4B~~~00;;;;4720;-1-1;-1-1;;1;5;5;1;786;;1;4;17;14;11;9;99;6;9;15;19;21;
+a15DT#~~~23AC~~00F;;;;5816;4720;5744;;1;5;5;1;787;;1;4;17;14;11;9;99;6;9;15;19;21;
+a19ET#K1B~2D~~~00;;;;4264;-1-1;-1-1;;1;5;5;1;788;;1;4;17;14;11;9;99;6;9;15;19;21;
+a06AT#X6~26CH2~00F;;;;4486;5377;8053;;1;5;5;1;790;;1;4;17;14;11;9;99;6;9;15;19;21;
+*14BT=~~~~4B~~~00;;;;4723;-1-1;-1-1;;1;5;5;1;790;;1;4;17;14;11;9;99;6;9;15;19;21;
+ap01:02;;;;1488;-1-1;;;1;5;5;1;791;;1;4;17;14;11;9;99;6;9;15;19;21;
+aP19;;;;;;;;1;5;4;1;815;;1;4;17;14;11;9;6;9;15;19;21;99;
+az4;;;;;;;;1;5;4;1;815;;1;4;17;14;11;9;6;9;15;19;21;99;
+*P11;;;;;;;;1;5;4;1;815;;1;4;17;14;11;9;6;9;15;19;21;99;
+*z5;;;;;;;;1;5;4;1;815;;1;4;17;14;11;9;6;9;15;19;21;99;
+a06SQ=~~~92C~~~+1;;;;0460;-1-1;4767;;1;5;4;1;815;;1;4;17;14;11;9;6;9;15;19;21;99;
+*p02:02;;;;4767;-1-1;;;1;5;4;1;816;;1;4;17;14;11;9;6;9;15;19;21;99;
+*P11;;;;;;;;1;4;4;1;831;;4;17;14;11;9;1;6;9;15;19;21;99;
+*z4;;;;;;;;1;4;4;1;831;;4;17;14;11;9;1;6;9;15;19;21;99;
+aP19;;;;;;;;1;4;4;1;831;;4;17;14;11;9;1;6;9;15;19;21;99;
+az4;;;;;;;;1;4;4;1;831;;4;17;14;11;9;1;6;9;15;19;21;99;
+*04SQ=~~~96D~~~00;;;;0570;-1-1;9954;;1;4;4;1;831;;4;17;14;11;9;1;6;9;15;19;21;99;
+ap02:03;;;;0146;-1-1;;;1;4;4;1;832;;4;17;14;11;9;1;6;9;15;19;21;99;
+aP19;;;;;;;;1;4;3;1;856;;4;17;14;11;9;1;9;15;19;21;99;6;
+az3;;;;;;;;1;4;3;1;856;;4;17;14;11;9;1;9;15;19;21;99;6;
+*P11;;;;;;;;1;4;3;1;856;;4;17;14;11;9;1;9;15;19;21;99;6;
+*z4;;;;;;;;1;4;3;1;856;;4;17;14;11;9;1;9;15;19;21;99;6;
+a09SQ/~~~15B~~~+1;;;;0582;-1-1;8165;;1;4;3;1;856;;4;17;14;11;9;1;9;15;19;21;99;6;
+*09RQ/~~~15BL~~-1B;;;;0582;-1-1;8165;;1;4;3;1;857;;4;17;14;11;9;1;9;15;19;21;99;6;
+a09FH#~~~56B~~~+1B;;;;1935;;8044;;1;4;3;1;859;;4;17;14;11;9;1;9;15;19;21;99;6;
+a19EM#K1P~3B~~~+1;;;;4460;-1-1;-1-1;;1;4;3;1;860;;4;17;14;11;9;1;9;15;19;21;99;6;
+a09AM-XP~89DP4~+1B;;;;3044;-1-1;7535;;1;4;3;1;861;;4;17;14;11;9;1;9;15;19;21;99;6;
+*04DM#~~~89DS~~-1B;;;;3044;-1-1;7535;;1;4;3;1;862;;4;17;14;11;9;1;9;15;19;21;99;6;
+*11ET#K1B~8B~~~-1;;;;3551;-1-1;-1-1;;1;4;3;1;864;;4;17;14;11;9;1;9;15;19;21;99;6;
+*04AT#X8~95BH2~-1B;;;;3283;-1-1;7881;;1;4;3;1;865;;4;17;14;11;9;1;9;15;19;21;99;6;
+a17DT=~~~95BS~~+1B;;;;3283;-1-1;7881;;1;4;3;1;865;;4;17;14;11;9;1;9;15;19;21;99;6;
+*p03:03;;;;3017;-1-1;;;1;4;3;1;866;;4;17;14;11;9;1;9;15;19;21;99;6;
+*P11;;;;;;;;1;3;3;1;887;;17;14;11;9;1;4;9;15;19;21;99;6;
+*z3;;;;;;;;1;3;3;1;887;;17;14;11;9;1;4;9;15;19;21;99;6;
+aP19;;;;;;;;1;3;3;1;887;;17;14;11;9;1;4;9;15;19;21;99;6;
+az3;;;;;;;;1;3;3;1;887;;17;14;11;9;1;4;9;15;19;21;99;6;
+*17SQ!~~~69D~~~00;;;;0551;-1-1;7630;;1;3;3;1;887;;17;14;11;9;1;4;9;15;19;21;99;6;
+a09RQ!~~~69DO~~00B;;;;0551;-1-1;7630;;1;3;3;1;888;;17;14;11;9;1;4;9;15;19;21;99;6;
+a19ET#K1B~2C~~~00;;;;4471;-1-1;-1-1;;1;3;3;1;889;;17;14;11;9;1;4;9;15;19;21;99;6;
+a06AT#X8~97BH2~00B;;;;3188;5385;6779;;1;3;3;1;890;;17;14;11;9;1;4;9;15;19;21;99;6;
+*09BT=~~~~4C~~~00;;;;4715;-1-1;-1-1;;1;3;3;1;890;;17;14;11;9;1;4;9;15;19;21;99;6;
+ap03:04;;;;3815;-1-1;;;1;3;3;1;891;;17;14;11;9;1;4;9;15;19;21;99;6;`;
+
 // --- 0. i18n (Internationalization) ---
 const i18n = {
     en: {
@@ -368,6 +481,22 @@ function showLogin(prefill) {
 }
 
 async function checkAuth() {
+    if (IS_DEMO) {
+        MY_TEAM_CODE = 'DEMO';
+        MY_TEAM_SLUG = 'demo';
+        MY_TEAM_NAME = 'Demo';
+
+        const badge = document.getElementById('team-badge');
+        if (badge) { badge.innerText = 'DEMO'; badge.style.display = 'inline-flex'; }
+
+        document.querySelectorAll('.menu-item-add, .menu-item-delete, [onclick*="openChangePasscode"]').forEach(el => el.style.display = 'none');
+
+        applyI18n();
+        if (window.YT && window.YT.Player) onYouTubeIframeAPIReady();
+        else { const tag = document.createElement('script'); tag.src = "https://www.youtube.com/iframe_api"; document.head.appendChild(tag); }
+        return;
+    }
+
     const params = new URLSearchParams(window.location.search);
     const linkSlug = params.get('team');
     const linkPass = params.get('key');
@@ -500,6 +629,16 @@ function startTracking() {
 
 // --- 3. データ取得・保存 (チーム隔離対応) ---
 function fetchMatchList() {
+    if (IS_DEMO) {
+        allMatchData = [{ cat: 'Demo', dvw: 'demo:FRA-POL', vid: DEMO_YOUTUBE_ID, display_name: 'FRA vs POL (Paris 2024)' }];
+        matchMap['demo:FRA-POL'] = DEMO_YOUTUBE_ID;
+        renderCategoryTabs(['All', 'Demo']); updateMatchDropdown();
+        currentMatchDVW = 'demo:FRA-POL';
+        player.loadVideoById(DEMO_YOUTUBE_ID);
+        document.getElementById('matchSelect').value = 'demo:FRA-POL';
+        parseDVW(DEMO_DVW);
+        return;
+    }
     supabaseClient.from('matches').select('*').order('created_at', { ascending: false })
     .then(dbRes => {
         allMatchData = []; let cats = new Set(["All"]);
@@ -674,7 +813,7 @@ async function parseDVW(text) {
     const autoNextEl = document.getElementById('autoNext');
     if(autoNextEl) autoNextEl.checked = (pointCodeCount > 0);
 
-    updateFilters(); await loadCloudData();
+    updateFilters(); if (!IS_DEMO) await loadCloudData();
 
     let urlIds = window.initLinkData.ids;
     let urlQ = window.initLinkData.q;
@@ -837,7 +976,7 @@ function render() {
                     <div style="color:var(--text-muted); font-size:0.75rem; margin-top:2px; font-weight:500;">P${escapeHtml(d.rot)} &middot; ${escapeHtml(d.skill)}${escapeHtml(d.effect)}</div>
                 </div>
             </div>
-            <div class="top-right-actions">
+            ${IS_DEMO ? '' : `<div class="top-right-actions">
                 <button class="action-sm-btn" ${noteBtnStyle} onclick="toggleActions(event, ${i})">&#x1F4AC; ${t('note_label')} ${cCount ? `(${cCount})` : ''}</button>
             </div>
             <div class="card-actions" id="actions-${i}">
@@ -858,7 +997,7 @@ function render() {
                     <button class="action-btn copy-link-btn" onclick="event.stopPropagation(); copyPlayLink(${i})">&#x1F517; ${t('copy_link')}</button>
                     <button class="action-btn line-btn" onclick="event.stopPropagation(); sharePlay(${i})">&#x1F4E4; ${t('share_play')}</button>
                 </div>
-            </div>`;
+            </div>`}`;
         list.appendChild(btn);
     });
 }
